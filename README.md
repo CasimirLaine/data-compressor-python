@@ -1,6 +1,6 @@
 # lempel-ziv-python
 
-<b>Python</b> implementation of the <i>lempel-ziv</i> algorithm.
+<b>Python</b> implementation of the <i>Lempel-Ziv</i> compression algorithm.
 
 ## Documentation
 

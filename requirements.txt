@@ -1,1 +1,2 @@
+virtualenv==20.16.2
 pytest==7.1.2
