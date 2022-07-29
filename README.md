@@ -4,11 +4,11 @@
 
 ## Documentation
 
-- [Project Specification](./docs/specification.md)
-- [Implementation Document](./docs/implementation.md)
-- [User Manual](./docs/manual.md)
-- [Test Document](./docs/testing.md)
-- [Weekly Reports](./docs/weekly)
+- [Project Specification](./specs/specification.md)
+- [Implementation Document](./specs/implementation.md)
+- [User Manual](./specs/manual.md)
+- [Test Document](./specs/testing.md)
+- [Weekly Reports](./specs/weekly)
 
 ## First steps
 

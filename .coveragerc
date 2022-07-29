@@ -6,8 +6,10 @@ omit =
     tests/lz_test/*
     docs/*
     env/*
+    specs/*
     main.py
     setup.py
+    .github/*
 
 [coverage:report]
 show_missing = True
@@ -18,4 +20,4 @@ exclude_lines =
     @(abc\.)?abstractmethod
 
 [html]
-directory = htmlcov
+directory = docs
