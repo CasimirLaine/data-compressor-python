@@ -18,4 +18,4 @@ exclude_lines =
     @(abc\.)?abstractmethod
 
 [html]
-directory = coverage/htmlcov
+directory = htmlcov
