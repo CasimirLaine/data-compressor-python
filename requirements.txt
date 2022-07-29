@@ -1,2 +1,5 @@
 virtualenv==20.16.2
 pytest==7.1.2
+pytest-cov==3.0.0
+pytest-xdist==2.5.0
+psutil==5.9.1

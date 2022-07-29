@@ -1,0 +1,21 @@
+[run]
+concurrency = multiprocessing
+parallel = true
+branch = True
+omit =
+    tests/lz_test/*
+    docs/*
+    env/*
+    main.py
+    setup.py
+
+[coverage:report]
+show_missing = True
+exclude_lines =
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    @(abc\.)?abstractmethod
+
+[html]
+directory = coverage/htmlcov
