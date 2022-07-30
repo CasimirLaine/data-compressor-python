@@ -7,7 +7,7 @@
 - [Project Specification](./specs/specification.md)
 - [Implementation Document](./specs/implementation.md)
 - [User Manual](./specs/manual.md)
-- [Test Document](./specs/testing.md)
+- [Test Document](./docs/index.html)
 - [Weekly Reports](./specs/weekly)
 
 ## First steps
