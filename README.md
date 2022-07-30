@@ -15,6 +15,7 @@
 Build and fetch dependencies:
 
 ```bash
+python setup.py
 ```
 
 ## Run configurations
@@ -24,6 +25,7 @@ Build and fetch dependencies:
 To run the program:
 
 ```bash
+python main.py
 ```
 
 ### Testing
@@ -31,6 +33,7 @@ To run the program:
 To run unit tests:
 
 ```bash
+pytest
 ```
 
 ### Generate Test Coverage
@@ -38,6 +41,8 @@ To run unit tests:
 To generate and view test coverage:
 
 ```bash
+pytest
+open docs/index.html
 ```
 
 ### Generate documentation
