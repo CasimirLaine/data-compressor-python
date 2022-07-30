@@ -7,7 +7,7 @@
 - [Project Specification](./specs/specification.md)
 - [Implementation Document](./specs/implementation.md)
 - [User Manual](./specs/manual.md)
-- [Test Document](./docs/index.html)
+- [Test Document](https://casimirlaine.github.io/lempel-ziv-python/)
 - [Weekly Reports](./specs/weekly)
 
 ## First steps
