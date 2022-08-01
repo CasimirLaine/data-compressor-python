@@ -3,6 +3,7 @@
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![PyCharm](https://img.shields.io/badge/pycharm-143?style=for-the-badge&logo=pycharm&logoColor=black&color=black&labelColor=green)
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
+[![Pylint](https://github.com/CasimirLaine/lempel-ziv-python/actions/workflows/pylint.yml/badge.svg?branch=master)](https://github.com/CasimirLaine/lempel-ziv-python/actions/workflows/pylint.yml)
 
 <b>Python</b> implementation of the <i>Lempel-Ziv</i> compression algorithm.
 
