@@ -4,6 +4,7 @@
 ![PyCharm](https://img.shields.io/badge/pycharm-143?style=for-the-badge&logo=pycharm&logoColor=black&color=black&labelColor=green)
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
 [![Pylint](https://github.com/CasimirLaine/lempel-ziv-python/actions/workflows/pylint.yml/badge.svg?branch=master)](https://github.com/CasimirLaine/lempel-ziv-python/actions/workflows/pylint.yml)
+[![pages-build-deployment](https://github.com/CasimirLaine/lempel-ziv-python/actions/workflows/pages/pages-build-deployment/badge.svg?branch=master)](https://github.com/CasimirLaine/lempel-ziv-python/actions/workflows/pages/pages-build-deployment)
 
 <b>Python</b> implementation of the <i>Lempel-Ziv</i> compression algorithm.
 
@@ -33,6 +34,14 @@ To run the program:
 python main.py
 ```
 
+### Static Analysis
+
+To run static code analysis tool (pylint):
+
+```bash
+pylint src
+```
+
 ### Testing
 
 To run unit tests:
@@ -48,6 +57,13 @@ To generate and view test coverage:
 ```bash
 pytest
 open docs/index.html
+```
+
+On <b>Windows</b>:
+
+```bash
+pytest
+start docs/index.html
 ```
 
 ### Generate documentation
