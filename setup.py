@@ -5,8 +5,8 @@ def install_requirements():
     req_file = 'requirements.txt'
     del_req_file = '.del_requirements.txt'
     commands = [
-        f'python -m venv env',
-        f'source env/bin/active',
+        f'python -m venv venv',
+        f'source venv/bin/activate',
         f'python -m pip install --upgrade pip',
         f'python -m pip freeze > {del_req_file}',
         f'python -m pip uninstall -y -r {del_req_file}',
