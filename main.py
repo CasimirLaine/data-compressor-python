@@ -2,11 +2,13 @@ import os
 import sys
 from pathlib import Path
 
+
 root_path = Path(__file__).resolve().parent
 path_prefix = f'{root_path}{os.sep}'
 sys.path.append(f'{path_prefix}src')
 
-import lz
+import compress.ui
+from compress import lz
 
 if __name__ == '__main__':
     compressor = lz.LZCompressor(
@@ -19,4 +21,4 @@ if __name__ == '__main__':
     print(len(encoded))
     print(original_text)
     print(encoded)
-
+    compress.ui.start(sys.argv)
