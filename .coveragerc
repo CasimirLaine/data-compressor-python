@@ -10,6 +10,7 @@ omit =
     main.py
     setup.py
     .github/*
+    sample/*
 
 [coverage:report]
 show_missing = True
