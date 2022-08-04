@@ -3,7 +3,7 @@ concurrency = multiprocessing
 parallel = true
 branch = True
 omit =
-    tests/lz_test/*
+    tests/lz_compress/*
     docs/*
     env/*
     specs/*
@@ -11,6 +11,7 @@ omit =
     setup.py
     .github/*
     sample/*
+    temp/*
 
 [coverage:report]
 show_missing = True

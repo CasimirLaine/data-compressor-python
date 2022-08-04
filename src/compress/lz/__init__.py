@@ -78,15 +78,13 @@ class _EncodingProcess:
                             longest_match_offset = left_offset
                 match_length = len(longest_match)
                 left_offset = longest_match_offset
-            encoded_buffer.append(left_offset)
             encoded_buffer.append(match_length)
-            index += match_length
-            if index < self.data_length:
-                encoded_buffer.append(self.original_data[index])
-            else:
-                encoded_buffer.append(0)
             if match_length == 0:
+                encoded_buffer.append(self.original_data[index])
                 index += 1
+            else:
+                encoded_buffer.append(left_offset)
+                index += match_length
         return encoded_buffer.decode(encoding=_STRING_ENCODING)
 
     def set_match(self, key, index: int):

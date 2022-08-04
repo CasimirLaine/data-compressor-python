@@ -1,6 +1,6 @@
 import uuid
 
-from lz import LZCompressor
+from compress.lz import LZCompressor
 
 
 def test_compressor_params():

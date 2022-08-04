@@ -15,7 +15,7 @@ if __name__ == '__main__':
         search_buffer_size=16 * 100,
         lookahead_buffer_size=8 * 100
     )
-    original_text = 'huiadhspvuapfhasdupifahdusi' * 10
+    original_text = 'testing' * 10
     encoded = compressor.encode(original_text)
     print(len(original_text))
     print(len(encoded))
