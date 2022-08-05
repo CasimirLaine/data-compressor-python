@@ -6,13 +6,14 @@ root_path = Path(__file__).resolve().parent
 path_prefix = f'{root_path}{os.sep}'
 sys.path.append(f'{path_prefix}src')
 
-from compress import lz
+from compress import lz, ui
 
 if __name__ == '__main__':
-    compressor = lz.LZCompressor()
+    compressor = lz.LZEncode()
     original_text = 'testing' * 20000
-    encoded = compressor.encode(original_text)
+    encoded = compressor.encode(data=original_text.encode()).decode(encoding='UTF-8', errors='replace')
     print(len(original_text))
     print(len(encoded))
     print(original_text)
     print(encoded)
+    ui.EncoderProgram(sys.argv).start()

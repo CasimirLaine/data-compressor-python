@@ -4,6 +4,7 @@ This module is responsible for rendering the command line interface.
 import getopt
 
 from compress.common import io, CompressionAlgorithm
+from compress.lz import LZ
 
 
 class Commands:
@@ -57,7 +58,7 @@ _OPTIONS: dict[str, _CommandLineArgument] = {
 }
 
 _ALGORITHMS: dict[str, CompressionAlgorithm] = {
-    Algorithm.LZ77: CompressionAlgorithm,
+    Algorithm.LZ77: LZ,
     Algorithm.HUFFMAN: CompressionAlgorithm
 }
 

@@ -1,17 +1,19 @@
 """
-This module is used as an API for developers to encode and decode data with LZ77.
+This module is used as an API for developers to encode and decode data with the Lempel-Ziv algorithm.
 """
-from typing import Optional
+from typing import Optional, Type
+
+from compress.common import CompressionAlgorithm, Decoder, Encoder
 
 _STRING_ENCODING = 'UTF-8'
 
 
-class LZCompressor:
+class LZEncode(Encoder):
     """
     Compressor that can can be modified in constructor arguments.
     Functions as the API for compression process.
+    Uses the Lempel-Ziv encoding algorithm to compress data.
     """
-
     def __init__(
             self,
             *,
@@ -24,13 +26,34 @@ class LZCompressor:
         self.search_buffer_size = search_buffer_size
         self.lookahead_buffer_size = lookahead_buffer_size
 
-    def encode(self, data: str):
+    def encode(self, data: bytes) -> bytes:
         """
         Function to call to provide input for the compressor to compress.
-        Returns the compressed text.
+        Returns the compressed bytes.
         """
         encoding_process = _EncodingProcess(self, data)
         return encoding_process.encode()
+
+
+class LZDecode(Decoder):
+
+    def decode(self, data: bytes) -> bytes:
+        pass
+
+
+class LZ(CompressionAlgorithm):
+    """
+    Compressor that can can be modified in constructor arguments.
+    Functions as the API for compression process.
+    """
+
+    @classmethod
+    def get_encoder(cls) -> Type[Encoder]:
+        return LZEncode
+
+    @classmethod
+    def get_decoder(cls) -> Type[Decoder]:
+        return LZDecode
 
 
 class _EncodingProcess:
@@ -38,14 +61,14 @@ class _EncodingProcess:
     Protected class to maintain the internal state of a single compression run.
     """
 
-    def __init__(self, compressor: LZCompressor, data: str):
+    def __init__(self, compressor: Encoder, data: bytes):
         super().__init__()
         self._compressor = compressor
-        self._original_data = data.encode(encoding=_STRING_ENCODING)
+        self._original_data = data
         self._cursor = -1
         self._matches: dict[str, list[int]] = {}
 
-    def encode(self) -> str:
+    def encode(self) -> bytes:
         """
         Used to start the encoding process internally.
         """
@@ -57,7 +80,7 @@ class _EncodingProcess:
             self.set_match(match_buffer, self._cursor)
             left_offset = 0
             match_length = 0
-            if match_indices is not None:
+            if match_indices is not None and match_indices[-1] >= self.search_limit():
                 longest_match_offset = self._cursor - match_indices[-1]
                 longest_match = match_buffer
                 for match_index in match_indices:
@@ -88,7 +111,7 @@ class _EncodingProcess:
             else:
                 encoded_buffer.extend(left_offset.to_bytes(length=1, byteorder='big', signed=False))
                 self._cursor += match_length
-        return encoded_buffer.decode(encoding=_STRING_ENCODING, errors='replace')
+        return encoded_buffer
 
     def set_match(self, key, index: int):
         if self._matches.get(key, None) is None:
