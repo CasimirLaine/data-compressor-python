@@ -3,7 +3,7 @@ concurrency = multiprocessing
 parallel = true
 branch = True
 omit =
-    tests/lz_compress/*
+    tests/*
     docs/*
     env/*
     specs/*
