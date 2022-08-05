@@ -1,9 +1,15 @@
+"""
+This module is responsible for rendering the command line interface.
+"""
 import getopt
 
 from compress.common import io, CompressionAlgorithm
 
 
 class Commands:
+    """
+    Contains all the commands the user can feed into the program.
+    """
     HELP = 'help'
     ALGORITHM = 'algorithm'
     OUTPUT_FILE = 'output_file'
@@ -12,11 +18,17 @@ class Commands:
 
 
 class Algorithm:
+    """
+    Contains all the algorithms the user can choose from.
+    """
     LZ77 = 'lz77'
     HUFFMAN = 'huffman'
 
 
 class Method:
+    """
+    Contains all the methods that can be performed on input data.
+    """
     ENCODE = 'encode'
     DECODE = 'decode'
 
@@ -51,6 +63,10 @@ _ALGORITHMS: dict[str, CompressionAlgorithm] = {
 
 
 class EncoderProgram:
+    """
+    Class used to initialize the command line interface.
+    It will process command line arguments and interpret them as commands.
+    """
 
     def __init__(self, arg_list: list[str]):
         super().__init__()
@@ -64,6 +80,9 @@ class EncoderProgram:
             raise RuntimeError
 
     def start(self):
+        """
+        This method is used to start the process that the user chose with command line arguments.
+        """
         if Commands.HELP in self._options:
             print(help_string(self._program_path))
         data = self._get_data()
@@ -77,9 +96,15 @@ class EncoderProgram:
         io.write_file(output_file_path, result)
 
     def _get_data(self) -> bytes:
+        """
+        Read the entire file the user provided as an input.
+        """
         return io.read_file(self._input_file)
 
     def _get_compression_algorithm(self) -> CompressionAlgorithm:
+        """
+        Returns the type of compression algorithm the user chose.
+        """
         compression_algorithm_name = self._options.get(Commands.ALGORITHM, Algorithm.LZ77)
         compression_algorithm = _ALGORITHMS.get(compression_algorithm_name, None)
         if compression_algorithm is None:
@@ -87,6 +112,9 @@ class EncoderProgram:
         return compression_algorithm
 
     def _get_method(self):
+        """
+        Returns the method the user chose for processsing the input.
+        """
         method = self._options.get(Commands.METHOD, None)
         if method != Method.ENCODE and method != Method.DECODE:
             method = Method.ENCODE
@@ -94,6 +122,9 @@ class EncoderProgram:
 
 
 def _parse_args(arg_list: list[str]) -> tuple[list[tuple[str, str]], list[str]]:
+    """
+    Parses the command line argument while conforming to the GNU CLI standards.
+    """
     if len(arg_list) < 1:
         print(help_string(arg_list[0]))
         raise RuntimeError
@@ -111,6 +142,9 @@ def _parse_args(arg_list: list[str]) -> tuple[list[tuple[str, str]], list[str]]:
 
 
 def _compose_options_dict(options):
+    """
+    Transforms the command line arguments into a more readable format.
+    """
     option_dict = {}
     for option in options:
         for command, arg in _OPTIONS.items():
@@ -120,6 +154,11 @@ def _compose_options_dict(options):
 
 
 def help_string(program_path: str):
+    """
+    Returns the help string of the program.
+    Used then -h or --help is present in the command line arguments.
+    Also printed when a misuse of the program is detected.
+    """
     output_string = program_path
     for command_line_arg in _OPTIONS.values():
         output_string += f' -{command_line_arg.short.rstrip(":")}'

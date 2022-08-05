@@ -15,8 +15,8 @@ class LZCompressor:
     def __init__(
             self,
             *,
-            search_buffer_size: int,
-            lookahead_buffer_size: int,
+            search_buffer_size: int = 255,
+            lookahead_buffer_size: int = 255,
     ):
         super().__init__()
         if lookahead_buffer_size > search_buffer_size:
@@ -50,42 +50,45 @@ class _EncodingProcess:
         Used to start the encoding process internally.
         """
         encoded_buffer = bytearray()
-        index = 0
-        while index < self.data_length:
-            match_buffer = self.original_data[index:index + 1]
+        self._cursor = 0
+        while self._cursor < self.data_length:
+            match_buffer = self.original_data[self._cursor:self._cursor + 1]
             match_indices = self.get_match(match_buffer)
-            self.set_match(match_buffer, index)
+            self.set_match(match_buffer, self._cursor)
             left_offset = 0
             match_length = 0
             if match_indices is not None:
-                longest_match_offset = index - match_indices[-1]
+                longest_match_offset = self._cursor - match_indices[-1]
                 longest_match = match_buffer
                 for match_index in match_indices:
-                    match_buffer = self.original_data[index:index + 1]
+                    if match_index < self.search_limit():
+                        continue
+                    match_buffer = self.original_data[self._cursor:self._cursor + 1]
                     for lookahead_pointer in range(
-                            min(index + 1, self.data_length - 1),
+                            min(self._cursor + 1, self.data_length - 1),
                             self.lookahead_limit() + 1
                     ):
-                        next_char_index = lookahead_pointer - index
-                        if match_index + next_char_index >= index:
+                        next_char_index = lookahead_pointer - self._cursor
+                        if match_index + next_char_index >= self._cursor:
                             break
                         if self.original_data[lookahead_pointer] != self.original_data[match_index + next_char_index]:
                             break
-                        left_offset = index - match_index
+                        left_offset = self._cursor - match_index
                         match_buffer += self.original_data[lookahead_pointer: lookahead_pointer + 1]
                         if len(longest_match) <= len(match_buffer):
                             longest_match = match_buffer
                             longest_match_offset = left_offset
                 match_length = len(longest_match)
                 left_offset = longest_match_offset
-            encoded_buffer.append(match_length)
+            encoded_buffer.extend(match_length.to_bytes(length=1, byteorder='big', signed=False))
             if match_length == 0:
-                encoded_buffer.append(self.original_data[index])
-                index += 1
+                encoded_buffer.extend(
+                    self.original_data[self._cursor].to_bytes(length=1, byteorder='big', signed=False))
+                self._cursor += 1
             else:
-                encoded_buffer.append(left_offset)
-                index += match_length
-        return encoded_buffer.decode(encoding=_STRING_ENCODING)
+                encoded_buffer.extend(left_offset.to_bytes(length=1, byteorder='big', signed=False))
+                self._cursor += match_length
+        return encoded_buffer.decode(encoding=_STRING_ENCODING, errors='replace')
 
     def set_match(self, key, index: int):
         if self._matches.get(key, None) is None:
@@ -117,11 +120,3 @@ class _EncodingProcess:
         Returns the largest index of the lookahead buffer.
         """
         return min(self._cursor + self._compressor.lookahead_buffer_size, self.data_length - 1)
-
-    @property
-    def cursor(self):
-        return self._cursor
-
-    @cursor.setter
-    def cursor(self, value: int):
-        self._cursor = value

@@ -1,11 +1,13 @@
 import uuid
 
+import pytest
+
 from compress.lz import LZCompressor
 
 
 def test_compressor_params():
-    search_buffer_size = 5
-    lookahead_buffer_size = 10
+    search_buffer_size = 10
+    lookahead_buffer_size = 5
     compressor = LZCompressor(
         search_buffer_size=search_buffer_size,
         lookahead_buffer_size=lookahead_buffer_size
@@ -14,11 +16,16 @@ def test_compressor_params():
     assert compressor.lookahead_buffer_size == lookahead_buffer_size
 
 
+def test_invalid_compressor_params():
+    with pytest.raises(RuntimeError):
+        compressor = LZCompressor(
+            search_buffer_size=5,
+            lookahead_buffer_size=10
+        )
+
+
 def test_encode_smaller():
-    input_string = str(uuid.uuid4()) * 100
-    compressor = LZCompressor(
-        search_buffer_size=10,
-        lookahead_buffer_size=5
-    )
+    input_string = str(uuid.uuid4()) * 50
+    compressor = LZCompressor()
     result = compressor.encode(input_string)
     assert len(result) <= len(input_string)
