@@ -42,7 +42,8 @@ class LZEncode(Encoder):
 class LZDecode(Decoder):
 
     def decode(self, data: bytes) -> bytes:
-        pass
+        decoding_process = _DecodingProcess(self, data)
+        return decoding_process.decode()
 
 
 class LZ(CompressionAlgorithm):
@@ -65,7 +66,7 @@ class _EncodingProcess:
     Protected class to maintain the internal state of a single compression run.
     """
 
-    def __init__(self, compressor: Encoder, data: bytes):
+    def __init__(self, compressor: LZEncode, data: bytes):
         super().__init__()
         self._compressor = compressor
         self._original_data = data
@@ -148,3 +149,33 @@ class _EncodingProcess:
         Returns the largest index of the lookahead buffer.
         """
         return min(self._cursor + self._compressor.lookahead_buffer_size, self.data_length - 1)
+
+
+class _DecodingProcess:
+
+    def __init__(self, decoder: LZDecode, data: bytes):
+        super().__init__()
+        self._decoder = decoder
+        self._original_data = data
+        self._cursor = -1
+
+    def decode(self) -> bytes:
+        data_in_bits = bitarray(endian=sys.byteorder)
+        data_in_bits.frombytes(self._original_data)
+        output_buffer = bytearray()
+        self._cursor = 0
+        while self._cursor < len(data_in_bits):
+            match_length = int.from_bytes(bytes(data_in_bits[self._cursor: self._cursor + 8]), byteorder=sys.byteorder)
+            character_or_offset = bytes(data_in_bits[self._cursor + 8: self._cursor + 16])
+            if match_length == 0:
+                output_buffer.extend(character_or_offset)
+            else:
+                character_or_offset_int = int.from_bytes(character_or_offset, byteorder=sys.byteorder)
+                output_buffer.extend(bytes(output_buffer[len(output_buffer) - character_or_offset_int: len(
+                    output_buffer) - character_or_offset_int + match_length]))
+            self._cursor += 16
+        return bytes(output_buffer)
+
+    @property
+    def data_length(self):
+        return len(self._original_data)

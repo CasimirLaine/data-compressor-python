@@ -29,3 +29,12 @@ def test_encode_smaller():
     compressor = lz.LZEncode()
     result = compressor.encode(input_string)
     assert len(result) <= len(input_string)
+
+
+def test_decode():
+    input_string = (str(uuid.uuid4()) * 50).encode()
+    compressor = lz.LZEncode()
+    result = compressor.encode(input_string)
+    decompressor = lz.LZDecode()
+    decoded_bytes = decompressor.decode(result)
+    assert input_string == decoded_bytes
