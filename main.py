@@ -16,7 +16,7 @@ if __name__ == '__main__':
     except FileNotFoundError:
         pass
     compressor = HuffmanEncoder()
-    original_text = 'testing' * 5
+    original_text = 'testing' * 10
     encoded = compressor.encode(data=original_text.encode()).decode(encoding='UTF-8', errors='replace')
     print(len(original_text))
     print(len(encoded))

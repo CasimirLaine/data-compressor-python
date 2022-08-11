@@ -1,5 +1,6 @@
 import bisect
-from typing import Type
+import sys
+from typing import Type, Optional
 
 from bitarray import bitarray
 
@@ -11,7 +12,7 @@ class Node:
             self,
             *,
             probability: int,
-            symbol: int,
+            symbol: Optional[int] = None,
             left: 'Node' = None,
             right: 'Node' = None
     ) -> None:
@@ -75,7 +76,6 @@ class _HuffmanEncodingProcess:
             right.code.append(1)
             combined = Node(
                 probability=left.probability + right.probability,
-                symbol=left.symbol + right.symbol,
                 left=left,
                 right=right
             )
@@ -91,13 +91,33 @@ class _HuffmanEncodingProcess:
         if node.left is node.right is None:
             codes[node.symbol] = new_code
 
+    def get_header_info(self, buffer: bitarray, node: Node):
+        if node.left:
+            self.get_header_info(buffer, node.left)
+        if node.right:
+            self.get_header_info(buffer, node.right)
+        if node.left is node.right is None:
+            buffer.append(1)
+            buffer.frombytes(node.symbol.to_bytes(length=1, byteorder=sys.byteorder))
+        else:
+            buffer.append(0)
+        buffer.append(0)
+
     def encode(self) -> bytes:
         root_node = self.construct_tree()
         codes = {}
         self.update_codes(root_node, '', codes)
+        header_buffer = bitarray()
+        self.get_header_info(header_buffer, root_node)
         output_buffer = bitarray()
         for char in self._original_data:
             sequence = codes[char]
             output_buffer.extend(sequence)
         output_buffer.fill()
-        return bytes(output_buffer)
+        return len(output_buffer).to_bytes(
+            length=4, byteorder=sys.byteorder, signed=False
+        ) + len(codes).to_bytes(
+            length=4, byteorder=sys.byteorder, signed=False
+        ) + len(self._original_data).to_bytes(
+            length=4, byteorder=sys.byteorder, signed=False
+        ) + bytes(header_buffer) + bytes(output_buffer)
