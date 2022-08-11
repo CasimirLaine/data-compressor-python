@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/lempel-ziv-python.iml" filepath="$PROJECT_DIR$/.idea/lempel-ziv-python.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/data-compressor-python.iml" filepath="$PROJECT_DIR$/.idea/data-compressor-python.iml" />
     </modules>
   </component>
 </project>

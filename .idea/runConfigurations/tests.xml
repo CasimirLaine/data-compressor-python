@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="tests" type="tests" factoryName="Autodetect">
-    <module name="lempel-ziv-python" />
+    <module name="data-compressor-python" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
