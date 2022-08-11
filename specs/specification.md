@@ -1,6 +1,6 @@
-# lempel-ziv-python
+# data-compressor-python
 
-<b>Python</b> implementation of the <i>Lempel-Ziv</i> compression algorithm.
+<b>Python</b> implementation of the <i>Lempel-Ziv</i> and <i>Huffman</i> compression algorithms.
 
 ## Problem
 
@@ -8,18 +8,18 @@ Reduce the size of files and text by compressing the data.
 
 ## Solution
 
-Create a program that takes files and text as input, compresses the data with Lempel-Ziv compression algorithm and output the compressed data.
+Create a program that takes files and text as input, compresses the data with the Lempel-Ziv and Huffman compression algorithms and outputs the compressed data.
 
 ## Data Structures and Algorithms Used
 
 LZ77 variation of the Lempel-Ziv compression algorithm.
+Huffman encoding algorithm.
 
 ## Usage
 
 The program has two methods: compress and decompress.
-The program can receive text strings and file paths as input to the terminal.
-Text strings will be compressed/decompressed and printed.
-File path input will compress/decompress the file provided by the path into a new file.
+The program can receive text strings as file paths from input to the terminal.
+File in that path will be compressed/decompressed and written to an output file.
 
 ## Performance goals
 
