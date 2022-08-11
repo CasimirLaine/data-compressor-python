@@ -35,14 +35,14 @@ class LZEncode(Encoder):
         Function to call to provide input for the compressor to compress.
         Returns the compressed bytes.
         """
-        encoding_process = _EncodingProcess(self, data)
+        encoding_process = _LZEncodingProcess(self, data)
         return encoding_process.encode()
 
 
 class LZDecode(Decoder):
 
     def decode(self, data: bytes) -> bytes:
-        decoding_process = _DecodingProcess(self, data)
+        decoding_process = _LZDecodingProcess(self, data)
         return decoding_process.decode()
 
 
@@ -61,14 +61,14 @@ class LZ(CompressionAlgorithm):
         return LZDecode
 
 
-class _EncodingProcess:
+class _LZEncodingProcess:
     """
     Protected class to maintain the internal state of a single compression run.
     """
 
     def __init__(self, compressor: LZEncode, data: bytes):
         super().__init__()
-        self._compressor = compressor
+        self._encoder = compressor
         self._original_data = data
         self._cursor = -1
         self._matches: dict[str, list[int]] = {}
@@ -142,16 +142,16 @@ class _EncodingProcess:
         """
         Returns the smallest index of the search buffer.
         """
-        return max(self._cursor - self._compressor.search_buffer_size, 0)
+        return max(self._cursor - self._encoder.search_buffer_size, 0)
 
     def lookahead_limit(self):
         """
         Returns the largest index of the lookahead buffer.
         """
-        return min(self._cursor + self._compressor.lookahead_buffer_size, self.data_length - 1)
+        return min(self._cursor + self._encoder.lookahead_buffer_size, self.data_length - 1)
 
 
-class _DecodingProcess:
+class _LZDecodingProcess:
 
     def __init__(self, decoder: LZDecode, data: bytes):
         super().__init__()
