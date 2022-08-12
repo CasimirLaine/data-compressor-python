@@ -4,7 +4,7 @@ from typing import Type, Optional
 
 from bitarray import bitarray
 
-from compress.common import Encoder, Decoder, CompressionAlgorithm
+from compress.common import Encoder, Decoder, CompressionAlgorithm, convert
 
 
 class Node:
@@ -31,7 +31,8 @@ class HuffmanEncoder(Encoder):
 
 class HuffmanDecoder(Decoder):
     def decode(self, data: bytes) -> bytes:
-        return data
+        decoder = _HuffmanDecodingProcess(self, data)
+        return decoder.decode()
 
 
 class Huffman(CompressionAlgorithm):
@@ -99,6 +100,7 @@ class _HuffmanEncodingProcess:
         if node.left is node.right is None:
             buffer.append(1)
             buffer.frombytes(node.symbol.to_bytes(length=1, byteorder=sys.byteorder))
+            print(node.symbol.to_bytes(length=1, byteorder=sys.byteorder))
         else:
             buffer.append(0)
         buffer.append(0)
@@ -114,10 +116,40 @@ class _HuffmanEncodingProcess:
             sequence = codes[char]
             output_buffer.extend(sequence)
         output_buffer.fill()
-        return len(output_buffer).to_bytes(
-            length=4, byteorder=sys.byteorder, signed=False
-        ) + len(codes).to_bytes(
-            length=4, byteorder=sys.byteorder, signed=False
-        ) + len(self._original_data).to_bytes(
-            length=4, byteorder=sys.byteorder, signed=False
-        ) + bytes(header_buffer) + bytes(output_buffer)
+        output_data_bytes = bytes(output_buffer)
+        return convert.int_to_bytes(
+            len(output_data_bytes)
+        ) + convert.int_to_bytes(
+            len(codes)
+        ) + convert.int_to_bytes(
+            len(self._original_data)
+        ) + bytes(header_buffer) + output_data_bytes
+
+
+class _HuffmanDecodingProcess:
+
+    def __init__(self, decoder: HuffmanDecoder, data: bytes):
+        self._decoder = decoder
+        self._original_data = data
+        self._compressed_chars = convert.bytes_to_int(data[0:4])
+        self._header_chars = convert.bytes_to_int(data[4:8])
+        self._original_chars = convert.bytes_to_int(data[8:12])
+
+    def decode(self) -> bytes:
+        input_buffer = bitarray()
+        input_buffer.frombytes(self._original_data[12:])
+        output_buffer = bitarray()
+        index = 0
+        char_stack = []
+        while index < len(input_buffer):
+            bit = input_buffer[index]
+            if bit == 0:
+                # if len(char_stack) == 1:
+                print(char_stack)
+                index += 1
+            elif bit == 1:
+                index += 1
+                character = input_buffer[index: index + 8].tobytes()
+                char_stack.append(character)
+                index += 8
+        return bytes(output_buffer)

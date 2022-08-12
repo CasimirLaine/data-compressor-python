@@ -11,7 +11,7 @@ from compress.common import CompressionAlgorithm, Decoder, Encoder
 _STRING_ENCODING = 'UTF-8'
 
 
-class LZEncode(Encoder):
+class LZEncoder(Encoder):
     """
     Compressor that can can be modified in constructor arguments.
     Functions as the API for compression process.
@@ -39,7 +39,7 @@ class LZEncode(Encoder):
         return encoding_process.encode()
 
 
-class LZDecode(Decoder):
+class LZDecoder(Decoder):
 
     def decode(self, data: bytes) -> bytes:
         decoding_process = _LZDecodingProcess(self, data)
@@ -54,11 +54,11 @@ class LZ(CompressionAlgorithm):
 
     @classmethod
     def get_encoder(cls) -> Type[Encoder]:
-        return LZEncode
+        return LZEncoder
 
     @classmethod
     def get_decoder(cls) -> Type[Decoder]:
-        return LZDecode
+        return LZDecoder
 
 
 class _LZEncodingProcess:
@@ -66,8 +66,7 @@ class _LZEncodingProcess:
     Protected class to maintain the internal state of a single compression run.
     """
 
-    def __init__(self, compressor: LZEncode, data: bytes):
-        super().__init__()
+    def __init__(self, compressor: LZEncoder, data: bytes):
         self._encoder = compressor
         self._original_data = data
         self._cursor = -1
@@ -153,8 +152,7 @@ class _LZEncodingProcess:
 
 class _LZDecodingProcess:
 
-    def __init__(self, decoder: LZDecode, data: bytes):
-        super().__init__()
+    def __init__(self, decoder: LZDecoder, data: bytes):
         self._decoder = decoder
         self._original_data = data
         self._cursor = -1
