@@ -93,7 +93,7 @@ class EncoderProgram:
             result = compression_algorithm.get_decoder()().decode(data)
         else:
             result = compression_algorithm.get_encoder()().encode(data)
-        output_file_path = self._options.get(Commands.OUTPUT_FILE, f'{self._input_file}.encoded')
+        output_file_path = self._options.get(Commands.OUTPUT_FILE, f'{self._input_file}.output')
         io.write_file(output_file_path, result)
 
     def _get_data(self) -> bytes:
