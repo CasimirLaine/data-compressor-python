@@ -11,7 +11,7 @@ class Node:
     def __init__(
             self,
             *,
-            probability: int,
+            probability: int = 0,
             symbol: Optional[int] = None,
             left: 'Node' = None,
             right: 'Node' = None
@@ -100,7 +100,6 @@ class _HuffmanEncodingProcess:
         if node.left is node.right is None:
             buffer.append(1)
             buffer.frombytes(node.symbol.to_bytes(length=1, byteorder=sys.byteorder))
-            print(node.symbol.to_bytes(length=1, byteorder=sys.byteorder))
         else:
             buffer.append(0)
         buffer.append(0)
@@ -135,21 +134,48 @@ class _HuffmanDecodingProcess:
         self._header_chars = convert.bytes_to_int(data[4:8])
         self._original_chars = convert.bytes_to_int(data[8:12])
 
+    def decode_header(self, input_buffer: bitarray):
+        index = 0
+        char_stack = []
+        node_stack = 0
+
+        def merge():
+            right = char_stack.pop()
+            left = char_stack.pop()
+            node = Node(left=left, right=right)
+            char_stack.append(node)
+
+        while index < len(input_buffer) and node_stack < self._header_chars:
+            bit = input_buffer[index]
+            if bit == 0:
+                if len(char_stack) > 1:
+                    merge()
+                index += 1
+            elif bit == 1:
+                index += 1
+                character = input_buffer[index: index + 8]
+                char_stack.append(Node(symbol=character.tobytes()))
+                index += 8
+                node_stack += 1
+        merge()
+        return char_stack.pop(), index
+
+    def find_char(self, node: Node, input_buffer: bitarray, index: int):
+        if node.left is node.right is None:
+            return node.symbol, index + 1
+        bit_found = input_buffer[index]
+        if bit_found == 0:
+            return self.find_char(node.left, input_buffer, index + 1)
+        elif bit_found == 1:
+            return self.find_char(node.right, input_buffer, index + 1)
+
     def decode(self) -> bytes:
         input_buffer = bitarray()
         input_buffer.frombytes(self._original_data[12:])
         output_buffer = bitarray()
-        index = 0
-        char_stack = []
+        root_node, index = self.decode_header(input_buffer)
         while index < len(input_buffer):
-            bit = input_buffer[index]
-            if bit == 0:
-                # if len(char_stack) == 1:
-                print(char_stack)
-                index += 1
-            elif bit == 1:
-                index += 1
-                character = input_buffer[index: index + 8].tobytes()
-                char_stack.append(character)
-                index += 8
+            char_found, index = self.find_char(root_node, input_buffer, index)
+            output_buffer.frombytes(char_found)
+        print(bytes(output_buffer))
         return bytes(output_buffer)
