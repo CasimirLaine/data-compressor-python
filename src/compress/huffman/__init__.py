@@ -1,5 +1,8 @@
+"""
+This module is used as an API for developers to encode and decode data with the Huffman algorithm.
+"""
 import bisect
-import sys
+import json
 from typing import Type, Optional
 
 from bitarray import bitarray
@@ -8,6 +11,9 @@ from compress.common import Encoder, Decoder, CompressionAlgorithm, convert
 
 
 class Node:
+    """
+    Represents a node in the Huffman tree.
+    """
     def __init__(
             self,
             *,
@@ -22,21 +28,41 @@ class Node:
         self.right = right
         self.code: bitarray = bitarray()
 
+    def __repr__(self) -> str:
+        string = '{\n'
+        if self.left:
+            string += f'"left": {self.left},\n'
+        if self.right:
+            string += f'"right": {self.right},\n'
+        string += f'"probability": "{self.probability}",\n'
+        string += f'"symbol": "{self.symbol}",\n'
+        string += f'"code": "{self.code}"\n'
+        string += '}'
+        return json.dumps(json.loads(string), indent=2)
+
 
 class HuffmanEncoder(Encoder):
+    """
+    Used to encode data with the Huffman algorithm.
+    """
     def encode(self, data: bytes) -> bytes:
         encoding_process = _HuffmanEncodingProcess(self, data)
         return encoding_process.encode()
 
 
 class HuffmanDecoder(Decoder):
+    """
+    Used to decode data with the Huffman algorithm.
+    """
     def decode(self, data: bytes) -> bytes:
         decoder = _HuffmanDecodingProcess(self, data)
         return decoder.decode()
 
 
 class Huffman(CompressionAlgorithm):
-
+    """
+    Links the Encoder and Decoder implementing the Huffman algorithm.
+    """
     @classmethod
     def get_encoder(cls) -> Type[Encoder]:
         return HuffmanEncoder
@@ -99,13 +125,14 @@ class _HuffmanEncodingProcess:
             self.get_header_info(buffer, node.right)
         if node.left is node.right is None:
             buffer.append(1)
-            buffer.frombytes(node.symbol.to_bytes(length=1, byteorder=sys.byteorder))
+            buffer.frombytes(convert.char_int_to_bytes(node.symbol))
         else:
             buffer.append(0)
         buffer.append(0)
 
     def encode(self) -> bytes:
         root_node = self.construct_tree()
+        print(root_node)
         codes = {}
         self.update_codes(root_node, '', codes)
         header_buffer = bitarray()
@@ -126,7 +153,9 @@ class _HuffmanEncodingProcess:
 
 
 class _HuffmanDecodingProcess:
-
+    """
+    Protected class to maintain the internal state of a single decompression run.
+    """
     def __init__(self, decoder: HuffmanDecoder, data: bytes):
         self._decoder = decoder
         self._original_data = data
@@ -154,7 +183,7 @@ class _HuffmanDecodingProcess:
             elif bit == 1:
                 index += 1
                 character = input_buffer[index: index + 8]
-                char_stack.append(Node(symbol=character.tobytes()))
+                char_stack.append(Node(symbol=convert.bytes_to_char_int(character.tobytes())))
                 index += 8
                 node_stack += 1
         merge()
@@ -174,8 +203,9 @@ class _HuffmanDecodingProcess:
         input_buffer.frombytes(self._original_data[12:])
         output_buffer = bitarray()
         root_node, index = self.decode_header(input_buffer)
+        print(root_node)
         while index < len(input_buffer):
             char_found, index = self.find_char(root_node, input_buffer, index)
-            output_buffer.frombytes(char_found)
+            output_buffer.frombytes(convert.char_int_to_bytes(char_found))
         print(bytes(output_buffer))
         return bytes(output_buffer)
