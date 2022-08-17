@@ -1,12 +1,11 @@
 """
 This module is used as an API for developers to encode and decode data with the Lempel-Ziv algorithm.
 """
-import sys
 from typing import Optional, Type
 
 from bitarray import bitarray
 
-from compress.common import CompressionAlgorithm, Decoder, Encoder
+from compress.common import CompressionAlgorithm, Decoder, Encoder, convert
 
 _STRING_ENCODING = 'UTF-8'
 
@@ -108,13 +107,13 @@ class _LZEncodingProcess:
         self._cursor = 0
         while self._cursor < self.data_length:
             left_offset, match_length = self._find_longest_match()
-            encoded_buffer.extend(match_length.to_bytes(length=1, byteorder=sys.byteorder, signed=False))
+            encoded_buffer.extend(convert.char_int_to_bytes(match_length))
             if match_length == 0:
                 encoded_buffer.extend(
-                    self.original_data[self._cursor].to_bytes(length=1, byteorder=sys.byteorder, signed=False))
+                    convert.char_int_to_bytes(self.original_data[self._cursor]))
                 self._cursor += 1
             else:
-                encoded_buffer.extend(left_offset.to_bytes(length=1, byteorder=sys.byteorder, signed=False))
+                encoded_buffer.extend(convert.char_int_to_bytes(left_offset))
                 self._cursor += match_length
         return encoded_buffer
 
@@ -158,17 +157,17 @@ class _LZDecodingProcess:
         self._cursor = -1
 
     def decode(self) -> bytes:
-        data_in_bits = bitarray(endian=sys.byteorder)
+        data_in_bits = bitarray()
         data_in_bits.frombytes(self._original_data)
         output_buffer = bytearray()
         self._cursor = 0
         while self._cursor < len(data_in_bits):
-            match_length = int.from_bytes(bytes(data_in_bits[self._cursor: self._cursor + 8]), byteorder=sys.byteorder)
+            match_length = convert.bytes_to_char_int(bytes(data_in_bits[self._cursor: self._cursor + 8]))
             character_or_offset = bytes(data_in_bits[self._cursor + 8: self._cursor + 16])
             if match_length == 0:
                 output_buffer.extend(character_or_offset)
             else:
-                character_or_offset_int = int.from_bytes(character_or_offset, byteorder=sys.byteorder)
+                character_or_offset_int = convert.bytes_to_char_int(character_or_offset)
                 output_buffer.extend(bytes(output_buffer[len(output_buffer) - character_or_offset_int: len(
                     output_buffer) - character_or_offset_int + match_length]))
             self._cursor += 16
