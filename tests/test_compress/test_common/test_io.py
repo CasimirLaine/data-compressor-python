@@ -12,8 +12,8 @@ def test_read_file():
 
 
 def test_read_invalid_file():
-    result = io.read_file(f'sample/{str(uuid.uuid4())}')
-    assert result is None
+    with pytest.raises(IOError):
+        io.read_file(f'sample/{str(uuid.uuid4())}')
 
 
 def test_write_file():
@@ -33,9 +33,3 @@ def test_write_file_exists():
         io.write_file(file_path, data_written)
     os.remove(file_path)
 
-
-def test_write_invalid_file():
-    file_path = f'temp/text.txt'
-    data_written = str(uuid.uuid4()).encode()
-    result = io.write_file(file_path, data_written)
-    os.remove(file_path)

@@ -2,6 +2,7 @@
 This module is responsible for rendering the command line interface.
 """
 import getopt
+import sys
 
 from compress.common import io, CompressionAlgorithm
 from compress.lz import LZ
@@ -94,13 +95,24 @@ class EncoderProgram:
         else:
             result = compression_algorithm.get_encoder()().encode(data)
         output_file_path = self._options.get(Commands.OUTPUT_FILE, f'{self._input_file}.output')
-        io.write_file(output_file_path, result)
+        try:
+            io.write_file(output_file_path, result)
+        except FileExistsError:
+            print(f'File {output_file_path} already exists')
+            sys.exit(-1)
+        except IOError:
+            print(f'Could not write to file {output_file_path}')
+            sys.exit(-1)
 
     def _get_data(self) -> bytes:
         """
         Read the entire file the user provided as an input.
         """
-        return io.read_file(self._input_file)
+        try:
+            return io.read_file(self._input_file)
+        except IOError:
+            print(f'Could not read file {self._input_file}')
+            sys.exit(-1)
 
     def _get_compression_algorithm(self) -> CompressionAlgorithm:
         """
