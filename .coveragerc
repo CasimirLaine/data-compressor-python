@@ -9,6 +9,7 @@ omit =
     specs/*
     main.py
     setup.py
+    testing.py
     .github/*
     sample/*
     temp/*

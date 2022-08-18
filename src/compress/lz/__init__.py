@@ -172,7 +172,3 @@ class _LZDecodingProcess:
                     output_buffer) - character_or_offset_int + match_length]))
             self._cursor += 16
         return bytes(output_buffer)
-
-    @property
-    def data_length(self):
-        return len(self._original_data)

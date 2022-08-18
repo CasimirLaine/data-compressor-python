@@ -97,8 +97,8 @@ class _HuffmanEncodingProcess:
         for symbol, probability in probabilities.items():
             bisect.insort_right(a=nodes, x=Node(probability=probability, symbol=symbol), key=sort_func)
         while len(nodes) > 1:
-            left = nodes.pop(-1)
-            right = nodes.pop(-1)
+            left = nodes.pop()
+            right = nodes.pop()
             left.code.append(0)
             right.code.append(1)
             combined = Node(

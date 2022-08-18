@@ -6,23 +6,7 @@ root_path = Path(__file__).resolve().parent
 path_prefix = f'{root_path}{os.sep}'
 sys.path.append(f'{path_prefix}src')
 
-from compress.huffman import HuffmanEncoder, HuffmanDecoder
-from compress import lz, ui
+from compress import ui
 
 if __name__ == '__main__':
-    try:
-        for file in os.scandir('temp'):
-            os.remove(file.path)
-    except FileNotFoundError:
-        pass
-    compressor = HuffmanEncoder()
-    original_text = 'testing' * 10
-    encoded = compressor.encode(data=original_text.encode())
-    print(len(original_text))
-    print(len(encoded))
-    decompressor = HuffmanDecoder()
-    decoded = decompressor.decode(encoded)
-    print(len(decoded))
-    # print(original_text)
-    # print(encoded)
-    # ui.EncoderProgram(sys.argv).start()
+    ui.EncoderProgram(sys.argv).start()

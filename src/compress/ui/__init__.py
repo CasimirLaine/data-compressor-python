@@ -72,14 +72,14 @@ class EncoderProgram:
 
     def __init__(self, arg_list: list[str]):
         super().__init__()
-        options, args = _parse_args(arg_list)
-        self._options = _compose_options_dict(options)
+        options, _ = _parse_args(arg_list)
+        self._options = compose_options_dict(options)
         self._program_path = arg_list[0]
         self._arg_list = arg_list[1:]
         self._input_file = self._options.get(Commands.FILE, None)
         if not self._input_file:
             print(help_string(self._program_path))
-            raise RuntimeError
+            sys.exit(-1)
 
     def start(self):
         """
@@ -129,7 +129,7 @@ class EncoderProgram:
         Returns the method the user chose for processsing the input.
         """
         method = self._options.get(Commands.METHOD, None)
-        if method != Method.ENCODE and method != Method.DECODE:
+        if method not in {Method.ENCODE, Method.DECODE}:
             method = Method.ENCODE
         return method
 
@@ -140,7 +140,7 @@ def _parse_args(arg_list: list[str]) -> tuple[list[tuple[str, str]], list[str]]:
     """
     if len(arg_list) < 1:
         print(help_string(arg_list[0]))
-        raise RuntimeError
+        sys.exit(-1)
     shorts = ''
     longs = []
     for command_line_arg in _OPTIONS.values():
@@ -150,11 +150,11 @@ def _parse_args(arg_list: list[str]) -> tuple[list[tuple[str, str]], list[str]]:
         opts, args = getopt.getopt(arg_list[1:], shorts, longs)
     except getopt.GetoptError:
         print(help_string(arg_list[0]))
-        raise
+        sys.exit(-1)
     return opts, args
 
 
-def _compose_options_dict(options):
+def compose_options_dict(options: list[tuple[str, str]]) -> dict[str, str]:
     """
     Transforms the command line arguments into a more readable format.
     """
@@ -162,7 +162,10 @@ def _compose_options_dict(options):
     for option in options:
         for command, arg in _OPTIONS.items():
             if option[0] == f'-{arg.short.rstrip(":")}' or option[0] == f'--{arg.long.rstrip("=")}':
-                option_dict[command] = option[1]
+                if len(option) >= 2 and option[1]:
+                    option_dict[command] = option[1]
+                else:
+                    option_dict[command] = None
     return option_dict
 
 

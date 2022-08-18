@@ -16,6 +16,8 @@
 - [Test Document](https://casimirlaine.github.io/data-compressor-python/)
 - [Weekly Reports](./specs/weekly)
 
+This project supports Python version 3.10+!
+
 ## First steps
 
 Build and fetch dependencies:
@@ -30,8 +32,9 @@ python setup.py
 
 To run the program:
 
-```bash
-python main.py
+```bash 
+python main.py -h --help -a <algorithm> --algorithm=<algorithm> -o <output_file> --output_file=<output_file> -f <file> --file=<file> -m <method> --method=<method> <input>
+
 ```
 
 ### Static Analysis
@@ -64,11 +67,4 @@ On <b>Windows</b>:
 ```bash
 pytest
 start docs/index.html
-```
-
-### Generate documentation
-
-To generate and view API documentation:
-
-```bash
 ```

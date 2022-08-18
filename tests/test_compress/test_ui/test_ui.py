@@ -24,3 +24,38 @@ def test_help_string():
 def test_help_string_path():
     test_path = 'test/program.py'
     assert ui.help_string(test_path).startswith(test_path)
+
+
+def test_cli_args():
+    options_dict = ui.compose_options_dict([
+        (
+            '-a', ui.Algorithm.LZ77
+        ),
+        (
+            '-o', 'file.output'
+        ),
+        (
+            '-f', 'file.txt'
+        ),
+        (
+            '-m', ui.Method.ENCODE
+        ),
+        (
+            '-h', None
+        )
+    ])
+    assert options_dict[ui.Commands.ALGORITHM] == ui.Algorithm.LZ77
+    assert options_dict[ui.Commands.OUTPUT_FILE] == 'file.output'
+    assert options_dict[ui.Commands.FILE] == 'file.txt'
+    assert options_dict[ui.Commands.METHOD] == ui.Method.ENCODE
+    assert options_dict[ui.Commands.HELP] is None
+
+
+def test_too_few_cli_args():
+    with pytest.raises(SystemExit):
+        ui.EncoderProgram(['python.py'])
+
+
+def test_no_input_file():
+    with pytest.raises(SystemExit):
+        ui.EncoderProgram(['python.py, -h'])
