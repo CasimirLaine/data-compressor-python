@@ -14,6 +14,7 @@ class Node:
     """
     Represents a node in the Huffman tree.
     """
+
     def __init__(
             self,
             *,
@@ -41,10 +42,15 @@ class Node:
         return json.dumps(json.loads(string), indent=2)
 
 
+def sort_func_node(node: Node):
+    return -1 * node.probability
+
+
 class HuffmanEncoder(Encoder):
     """
     Used to encode data with the Huffman algorithm.
     """
+
     def encode(self, data: bytes) -> bytes:
         encoding_process = _HuffmanEncodingProcess(self, data)
         return encoding_process.encode()
@@ -54,6 +60,7 @@ class HuffmanDecoder(Decoder):
     """
     Used to decode data with the Huffman algorithm.
     """
+
     def decode(self, data: bytes) -> bytes:
         decoder = _HuffmanDecodingProcess(self, data)
         return decoder.decode()
@@ -63,6 +70,7 @@ class Huffman(CompressionAlgorithm):
     """
     Links the Encoder and Decoder implementing the Huffman algorithm.
     """
+
     @classmethod
     def get_encoder(cls) -> Type[Encoder]:
         return HuffmanEncoder
@@ -93,9 +101,8 @@ class _HuffmanEncodingProcess:
     def construct_tree(self) -> Node:
         probabilities = self.calculate_probabilities()
         nodes: list[Node] = []
-        sort_func = lambda node: -1 * node.probability
         for symbol, probability in probabilities.items():
-            bisect.insort_right(a=nodes, x=Node(probability=probability, symbol=symbol), key=sort_func)
+            bisect.insort_right(a=nodes, x=Node(probability=probability, symbol=symbol), key=sort_func_node)
         while len(nodes) > 1:
             left = nodes.pop()
             right = nodes.pop()
@@ -106,7 +113,7 @@ class _HuffmanEncodingProcess:
                 left=left,
                 right=right
             )
-            bisect.insort_right(a=nodes, x=combined, key=sort_func)
+            bisect.insort_right(a=nodes, x=combined, key=sort_func_node)
         return nodes[0]
 
     def update_codes(self, node: Node, code, codes: dict):
@@ -156,6 +163,7 @@ class _HuffmanDecodingProcess:
     """
     Protected class to maintain the internal state of a single decompression run.
     """
+
     def __init__(self, decoder: HuffmanDecoder, data: bytes):
         self._decoder = decoder
         self._original_data = data
@@ -165,29 +173,29 @@ class _HuffmanDecodingProcess:
 
     def decode_header(self, input_buffer: bitarray):
         index = 0
-        char_stack = []
-        node_stack = 0
+        node_stack = []
+        node_count = 0
 
         def merge():
-            right = char_stack.pop()
-            left = char_stack.pop()
+            right = node_stack.pop()
+            left = node_stack.pop()
             node = Node(left=left, right=right)
-            char_stack.append(node)
+            node_stack.append(node)
 
-        while index < len(input_buffer) and node_stack < self._header_chars:
+        while index < len(input_buffer) and node_count < self._header_chars:
             bit = input_buffer[index]
+            if len(node_stack) > 1:
+                merge()
             if bit == 0:
-                if len(char_stack) > 1:
-                    merge()
                 index += 1
             elif bit == 1:
                 index += 1
                 character = input_buffer[index: index + 8]
-                char_stack.append(Node(symbol=convert.bytes_to_char_int(character.tobytes())))
+                node_stack.append(Node(symbol=convert.bytes_to_char_int(character.tobytes())))
                 index += 8
-                node_stack += 1
+                node_count += 1
         merge()
-        return char_stack.pop(), index
+        return node_stack.pop(), index
 
     def find_char(self, node: Node, input_buffer: bitarray, index: int):
         if node.left is node.right is None:

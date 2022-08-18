@@ -15,9 +15,9 @@ __ALGORITHMS = [
 
 def _gen_combinations():
     combinations = []
-    for n in __N:
-        for a in __ALGORITHMS:
-            combinations.append((n, *a))
+    for a in __ALGORITHMS:
+        for n in __N:
+            combinations.append((*a, n))
     return combinations
 
 
@@ -25,16 +25,16 @@ def _random_bytes(n):
     return ''.join(random.choice(string.printable) for _ in range(n)).encode()
 
 
-@pytest.mark.parametrize("n, encoder, decoder", _gen_combinations())
-def test_encode_smaller(n, encoder, decoder):
+@pytest.mark.parametrize("encoder, decoder, n", _gen_combinations())
+def test_encode_smaller(encoder, decoder, n):
     input_bytes = _random_bytes(n)
     compressor = encoder()
     result = compressor.encode(input_bytes)
     assert len(result) <= len(input_bytes)
 
 
-@pytest.mark.parametrize("n, encoder, decoder", _gen_combinations())
-def test_decode(n, encoder, decoder):
+@pytest.mark.parametrize("encoder, decoder, n", _gen_combinations())
+def test_decode(encoder, decoder, n):
     input_bytes = _random_bytes(n)
     compressor = encoder()
     result = compressor.encode(input_bytes)
