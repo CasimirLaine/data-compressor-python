@@ -4,7 +4,7 @@ from compress import ui
 
 
 def test_empty_input_file():
-    with pytest.raises(RuntimeError):
+    with pytest.raises(SystemExit):
         ui.EncoderProgram(['program.py'])
 
 

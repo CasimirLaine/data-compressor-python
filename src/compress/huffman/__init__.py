@@ -207,7 +207,7 @@ class _HuffmanDecodingProcess:
                 node_count += 1
         while len(node_stack) > 1:
             merge()
-        index += index % 8
+        index += (8 - index % 8)
         return node_stack.pop(), index
 
     def find_char(self, node: Node, input_buffer: bitarray, index: int):
