@@ -114,7 +114,10 @@ class _HuffmanEncodingProcess:
         probabilities = self.calculate_probabilities()
         nodes: list[Node] = []
         for symbol, probability in probabilities.items():
-            bisect.insort_right(a=nodes, x=Node(probability=probability, symbol=symbol), key=sort_func_node)
+            bisect.insort_right(a=nodes, x=Node(
+                probability=probability,
+                symbol=symbol
+            ), key=sort_func_node)
         while len(nodes) > 1:
             left = nodes.pop()
             right = nodes.pop()
@@ -160,14 +163,15 @@ class _HuffmanEncodingProcess:
             sequence = codes[char]
             output_buffer.extend(sequence)
         output_buffer.fill()
+        header_buffer_bytes = bytes(header_buffer)
         output_data_bytes = bytes(output_buffer)
         return convert.int_to_bytes(
-            len(output_data_bytes)
+            len(header_buffer_bytes)
         ) + convert.int_to_bytes(
             len(codes)
         ) + convert.int_to_bytes(
             len(self._original_data)
-        ) + bytes(header_buffer) + output_data_bytes
+        ) + header_buffer_bytes + output_data_bytes
 
 
 class _HuffmanDecodingProcess:
@@ -178,9 +182,9 @@ class _HuffmanDecodingProcess:
     def __init__(self, decoder: HuffmanDecoder, data: bytes):
         self._decoder = decoder
         self._original_data = data
-        self._compressed_chars = convert.bytes_to_int(data[0:4])
-        self._header_chars = convert.bytes_to_int(data[4:8])
-        self._original_chars = convert.bytes_to_int(data[8:12])
+        self._header_bytes = convert.bytes_to_int(data[0:4])
+        self._unique_byte_count = convert.bytes_to_int(data[4:8])
+        self._original_byte_count = convert.bytes_to_int(data[8:12])
 
     def decode_header(self, input_buffer: bitarray):
         index = 0
@@ -193,7 +197,7 @@ class _HuffmanDecodingProcess:
             node = Node(left=left, right=right)
             node_stack.append(node)
 
-        while index < len(input_buffer) and node_count < self._header_chars:
+        while index < len(input_buffer) and node_count < self._unique_byte_count:
             bit = input_buffer[index]
             if bit == 0:
                 if len(node_stack) > 1:
@@ -207,7 +211,7 @@ class _HuffmanDecodingProcess:
                 node_count += 1
         while len(node_stack) > 1:
             merge()
-        index += (8 - index % 8)
+        index += (8 - index % 8) % 8
         return node_stack.pop(), index
 
     def find_char(self, node: Node, input_buffer: bitarray, index: int):
@@ -216,7 +220,7 @@ class _HuffmanDecodingProcess:
         bit_found = input_buffer[index]
         if bit_found == 0:
             return self.find_char(node.left, input_buffer, index + 1)
-        elif bit_found == 1:
+        if bit_found == 1:
             return self.find_char(node.right, input_buffer, index + 1)
 
     def decode(self) -> bytes:
@@ -225,7 +229,8 @@ class _HuffmanDecodingProcess:
         output_buffer = bitarray()
         root_node, index = self.decode_header(input_buffer)
         char_count = 0
-        while index < len(input_buffer) and char_count < self._original_chars:
+        index = self._header_bytes * 8
+        while index < len(input_buffer) and char_count < self._original_byte_count:
             char_found, index = self.find_char(root_node, input_buffer, index)
             char_count += 1
             output_buffer.frombytes(convert.char_int_to_bytes(char_found))

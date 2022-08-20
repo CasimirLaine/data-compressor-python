@@ -16,6 +16,7 @@ __ALGORITHMS = [
 ]
 
 __FILES = [
+    'sample/simple.txt',
     'sample/lorem.txt',
     'sample/image.jpeg',
     'sample/image.png',
@@ -84,15 +85,20 @@ def test_decode(algorithm, n):
 
 @pytest.mark.parametrize("algorithm, file", _gen_file_combinations())
 def test_read_file(algorithm, file):
+    output_path = f'{file}.output'
+    try:
+        os.remove(output_path)
+    except FileNotFoundError:
+        pass
     file = os.path.join(ROOT_PATH, file)
     encoder, decoder = (algorithm.get_encoder(), algorithm.get_decoder())
     input_bytes = io.read_file(file)
     compressor = encoder()
     result = compressor.encode(input_bytes)
-    # output_path = f'{file}.output'
-    # io.write_file(output_path, result)
-    # compressed_bytes = io.read_file(file)
-    # os.remove(output_path)
+    io.write_file(output_path, result)
+    compressed_bytes = io.read_file(output_path)
+    os.remove(output_path)
     decompressor = decoder()
-    decoded_bytes = decompressor.decode(result)
+    decoded_bytes = decompressor.decode(compressed_bytes)
+    io.write_file(output_path, decoded_bytes)
     assert input_bytes == decoded_bytes

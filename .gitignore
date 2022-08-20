@@ -306,3 +306,4 @@ cython_debug/
 .del_requirements.txt
 /temp/
 /testing.py
+*.output
