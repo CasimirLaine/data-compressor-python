@@ -41,6 +41,11 @@ class Node:
         string += '}'
         return json.dumps(json.loads(string), indent=2)
 
+    @property
+    def symbol_to_char(self):
+        if self.symbol is not None:
+            return chr(self.symbol)
+
 
 def sort_func_node(node: Node):
     return -1 * node.probability
@@ -116,7 +121,7 @@ class _HuffmanEncodingProcess:
             bisect.insort_right(a=nodes, x=combined, key=sort_func_node)
         return nodes[0]
 
-    def update_codes(self, node: Node, code, codes: dict):
+    def update_codes(self, node: Node, code: str, codes: dict):
         new_code = code + node.code.to01()
         if node.left:
             self.update_codes(node.left, new_code, codes)
@@ -135,7 +140,7 @@ class _HuffmanEncodingProcess:
             buffer.frombytes(convert.char_int_to_bytes(node.symbol))
         else:
             buffer.append(0)
-        buffer.append(0)
+        # buffer.append(0)
 
     def encode(self) -> bytes:
         root_node = self.construct_tree()
@@ -144,6 +149,7 @@ class _HuffmanEncodingProcess:
         self.update_codes(root_node, '', codes)
         header_buffer = bitarray()
         self.get_header_info(header_buffer, root_node)
+        header_buffer.fill()
         output_buffer = bitarray()
         for char in self._original_data:
             sequence = codes[char]
@@ -195,11 +201,12 @@ class _HuffmanDecodingProcess:
                 index += 8
                 node_count += 1
         merge()
+        index += index % 8
         return node_stack.pop(), index
 
     def find_char(self, node: Node, input_buffer: bitarray, index: int):
         if node.left is node.right is None:
-            return node.symbol, index + 1
+            return node.symbol, index
         bit_found = input_buffer[index]
         if bit_found == 0:
             return self.find_char(node.left, input_buffer, index + 1)
@@ -212,8 +219,10 @@ class _HuffmanDecodingProcess:
         output_buffer = bitarray()
         root_node, index = self.decode_header(input_buffer)
         print(root_node)
-        while index < len(input_buffer):
+        char_count = 0
+        while index < len(input_buffer) and char_count < self._original_chars:
             char_found, index = self.find_char(root_node, input_buffer, index)
+            char_count += 1
             output_buffer.frombytes(convert.char_int_to_bytes(char_found))
         print(bytes(output_buffer))
         return bytes(output_buffer)
