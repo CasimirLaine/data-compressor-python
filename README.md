@@ -13,7 +13,7 @@
 - [Project Specification](./specs/specification.md)
 - [Implementation Document](./specs/implementation.md)
 - [User Manual](./specs/manual.md)
-- [Test Document](https://casimirlaine.github.io/data-compressor-python/)
+- [Test Document](./specs/testing.md)
 - [Weekly Reports](./specs/weekly)
 
 This project supports Python version 3.10+!
