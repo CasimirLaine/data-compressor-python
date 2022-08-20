@@ -3,6 +3,7 @@ This module is used as an API for developers to encode and decode data with the 
 """
 import bisect
 import json
+import string
 from typing import Type, Optional
 
 from bitarray import bitarray
@@ -30,21 +31,27 @@ class Node:
         self.code: bitarray = bitarray()
 
     def __repr__(self) -> str:
-        string = '{\n'
+        output_str = '{\n'
         if self.left:
-            string += f'"left": {self.left},\n'
+            output_str += f'"left": {self.left},\n'
         if self.right:
-            string += f'"right": {self.right},\n'
-        string += f'"probability": "{self.probability}",\n'
-        string += f'"symbol": "{self.symbol}",\n'
-        string += f'"code": "{self.code}"\n'
-        string += '}'
-        return json.dumps(json.loads(string), indent=2)
+            output_str += f'"right": {self.right},\n'
+        output_str += f'"probability": "{self.probability}",\n'
+        output_str += f'"symbol": "{self.symbol}",\n'
+        output_str += f'"char": "{self.symbol_to_char}",\n'
+        output_str += f'"code": "{self.code}"\n'
+        output_str += '}'
+        return json.dumps(json.loads(output_str), indent=2)
 
     @property
     def symbol_to_char(self):
-        if self.symbol is not None:
-            return chr(self.symbol)
+        try:
+            symbol_chr = chr(self.symbol)
+            if symbol_chr in string.ascii_letters or symbol_chr in string.digits:
+                return symbol_chr
+            return 'not printable'
+        except Exception:
+            return "null"
 
 
 def sort_func_node(node: Node):
@@ -140,11 +147,9 @@ class _HuffmanEncodingProcess:
             buffer.frombytes(convert.char_int_to_bytes(node.symbol))
         else:
             buffer.append(0)
-        # buffer.append(0)
 
     def encode(self) -> bytes:
         root_node = self.construct_tree()
-        print(root_node)
         codes = {}
         self.update_codes(root_node, '', codes)
         header_buffer = bitarray()
@@ -190,9 +195,9 @@ class _HuffmanDecodingProcess:
 
         while index < len(input_buffer) and node_count < self._header_chars:
             bit = input_buffer[index]
-            if len(node_stack) > 1:
-                merge()
             if bit == 0:
+                if len(node_stack) > 1:
+                    merge()
                 index += 1
             elif bit == 1:
                 index += 1
@@ -200,7 +205,8 @@ class _HuffmanDecodingProcess:
                 node_stack.append(Node(symbol=convert.bytes_to_char_int(character.tobytes())))
                 index += 8
                 node_count += 1
-        merge()
+        while len(node_stack) > 1:
+            merge()
         index += index % 8
         return node_stack.pop(), index
 
@@ -218,11 +224,9 @@ class _HuffmanDecodingProcess:
         input_buffer.frombytes(self._original_data[12:])
         output_buffer = bitarray()
         root_node, index = self.decode_header(input_buffer)
-        print(root_node)
         char_count = 0
         while index < len(input_buffer) and char_count < self._original_chars:
             char_found, index = self.find_char(root_node, input_buffer, index)
             char_count += 1
             output_buffer.frombytes(convert.char_int_to_bytes(char_found))
-        print(bytes(output_buffer))
         return bytes(output_buffer)

@@ -9,7 +9,7 @@ __N = [1_000, 10_000, 100_000, 1_000_000]
 
 __ALGORITHMS = [
     (huffman.HuffmanEncoder, huffman.HuffmanDecoder),
-    (lz.LZEncoder, lz.LZDecoder)
+    # (lz.LZEncoder, lz.LZDecoder)
 ]
 
 
@@ -31,6 +31,16 @@ def test_encode_smaller(encoder, decoder, n):
     compressor = encoder()
     result = compressor.encode(input_bytes)
     assert len(result) <= len(input_bytes)
+
+
+@pytest.mark.parametrize("encoder, decoder, n", _gen_combinations())
+def test_decode_same_length(encoder, decoder, n):
+    input_bytes = _random_bytes(n)
+    compressor = encoder()
+    result = compressor.encode(input_bytes)
+    decompressor = decoder()
+    decoded_bytes = decompressor.decode(result)
+    assert len(input_bytes) == len(decoded_bytes)
 
 
 @pytest.mark.parametrize("encoder, decoder, n", _gen_combinations())
