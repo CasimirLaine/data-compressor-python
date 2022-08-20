@@ -18,6 +18,14 @@ The application logic has been tested via pytest test framework. Tests can be fo
 
 The latest coverage report can be found [here](https://casimirlaine.github.io/data-compressor-python/).
 
+### Testing
+
+To run unit tests run the following command from the root of the project:
+
+```bash
+pytest
+```
+
 ## Integration tests
 
 Application has been tested in the following formats:
