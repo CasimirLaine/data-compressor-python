@@ -102,6 +102,9 @@ class _HuffmanEncodingProcess:
         self._original_data = data
 
     def calculate_probabilities(self) -> dict[int, int]:
+        """
+        Iterates the input data to calculate the frequencies of bytes.
+        """
         probabilities = {}
         for char in self._original_data:
             if char in probabilities:
@@ -111,6 +114,9 @@ class _HuffmanEncodingProcess:
         return probabilities
 
     def construct_tree(self) -> Node:
+        """
+        Constructs the Huffman tree out of input bytes.
+        """
         probabilities = self.calculate_probabilities()
         nodes: list[Node] = []
         for symbol, probability in probabilities.items():
@@ -132,6 +138,9 @@ class _HuffmanEncodingProcess:
         return nodes[0]
 
     def update_codes(self, node: Node, code: str, codes: dict):
+        """
+        Sets the code values for leaf nodes in the Huffman tree.
+        """
         new_code = code + node.code.to01()
         if node.left:
             self.update_codes(node.left, new_code, codes)
@@ -140,11 +149,14 @@ class _HuffmanEncodingProcess:
         if node.left is node.right is None:
             codes[node.symbol] = new_code
 
-    def get_header_info(self, buffer: bitarray, node: Node):
+    def write_header_info(self, buffer: bitarray, node: Node):
+        """
+        Writes the Huffman tree into a buffer.
+        """
         if node.left:
-            self.get_header_info(buffer, node.left)
+            self.write_header_info(buffer, node.left)
         if node.right:
-            self.get_header_info(buffer, node.right)
+            self.write_header_info(buffer, node.right)
         if node.left is node.right is None:
             buffer.append(1)
             buffer.frombytes(convert.char_int_to_bytes(node.symbol))
@@ -152,11 +164,14 @@ class _HuffmanEncodingProcess:
             buffer.append(0)
 
     def encode(self) -> bytes:
+        """
+        Encodes the input bytes and returns the encoded bytes.
+        """
         root_node = self.construct_tree()
         codes = {}
         self.update_codes(root_node, '', codes)
         header_buffer = bitarray()
-        self.get_header_info(header_buffer, root_node)
+        self.write_header_info(header_buffer, root_node)
         header_buffer.fill()
         output_buffer = bitarray()
         for char in self._original_data:
@@ -187,6 +202,9 @@ class _HuffmanDecodingProcess:
         self._original_byte_count = convert.bytes_to_int(data[8:12])
 
     def decode_header(self, input_buffer: bitarray):
+        """
+        Decodes the encoded Huffman tree from the input.
+        """
         index = 0
         node_stack = []
         node_count = 0
@@ -215,6 +233,9 @@ class _HuffmanDecodingProcess:
         return node_stack.pop(), index
 
     def find_char(self, node: Node, input_buffer: bitarray, index: int):
+        """
+        Finds a bytes from the Huffman tree matching the series of bits in the input.
+        """
         if node.left is node.right is None:
             return node.symbol, index
         bit_found = input_buffer[index]
@@ -224,6 +245,9 @@ class _HuffmanDecodingProcess:
             return self.find_char(node.right, input_buffer, index + 1)
 
     def decode(self) -> bytes:
+        """
+        Decodes the input bytes and returns the encoded bytes.
+        """
         input_buffer = bitarray()
         input_buffer.frombytes(self._original_data[12:])
         output_buffer = bitarray()
