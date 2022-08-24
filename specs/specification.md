@@ -1,4 +1,4 @@
-# data-compressor-python
+# Specification
 
 <b>Python</b> implementation of the <i>Lempel-Ziv</i> and <i>Huffman</i> compression algorithms.
 
@@ -8,12 +8,16 @@ Reduce the size of files and text by compressing the data.
 
 ## Solution
 
-Create a program that takes files and text as input, compresses the data with the Lempel-Ziv and Huffman compression algorithms and outputs the compressed data.
+<!-- include(implementation.md) -->
+
+Create a program that takes files as input, compresses the data with the Lempel-Ziv and Huffman compression algorithms
+and outputs the compressed data.
 
 ## Data Structures and Algorithms Used
 
 LZ77 variation of the Lempel-Ziv compression algorithm.
 Huffman encoding algorithm.
+For Huffman a tree data structure is implemented.
 
 ## Usage
 
@@ -21,17 +25,17 @@ The program has two methods: compress and decompress.
 The program can receive text strings as file paths from input to the terminal.
 File in that path will be compressed/decompressed and written to an output file.
 
-## Performance goals
+## Performance Goals
 
 ### Lempel-Ziv
 
-#### Encoding: 
+#### Encoding:
 
 Time complexity: O(n)
 
 Space complexity: O(n + m)
 
-#### Decoding: 
+#### Decoding:
 
 Time complexity: O(n)
 
@@ -39,13 +43,13 @@ Space complexity: O(n + m)
 
 ### Huffman
 
-#### Encoding: 
+#### Encoding:
 
 Time complexity: O(n log n)
 
 Space complexity: O(n log n)
 
-#### Decoding: 
+#### Decoding:
 
 Time complexity: O(n log n)
 
@@ -59,16 +63,4 @@ Degree Programme: Bachelor’s in Computer Science
 
 Documentation & Implementation language: English
 
-## Sources
-
-https://en.wikipedia.org/wiki/LZ77_and_LZ78
-
-https://en.wikipedia.org/wiki/Huffman_coding
-
-https://www.cs.helsinki.fi/u/puglisi/dct2017
-
-https://towardsdatascience.com/how-data-compression-works-exploring-lz77-3a2c2e06c097
-
-https://www.slideshare.net/jkciitj/optimization-of-lz77-data-compression-algorithm
-
-https://engineering.purdue.edu/ece264/17au/hw/HW13?alt=huffman
+## [Sources](sources.md)

@@ -1,4 +1,4 @@
-# Test document
+# Test Document
 
 The program has been tested with **Python** version 3.10.
 
