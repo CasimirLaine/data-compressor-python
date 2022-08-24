@@ -1,6 +1,7 @@
 import os
 import random
 import string
+import uuid
 
 import pytest
 
@@ -83,22 +84,63 @@ def test_decode(algorithm, n):
     assert input_bytes == decoded_bytes
 
 
+@pytest.fixture(autouse=True, scope='function')
+def delete_output_files():
+    def clear_output():
+        sample_folder = os.path.join(ROOT_PATH, 'sample')
+        for entry in os.scandir(sample_folder):
+            if entry.is_file() and entry.name.endswith('.output'):
+                try:
+                    os.remove(entry.path)
+                except FileNotFoundError:
+                    pass
+
+    clear_output()
+    yield
+    clear_output()
+
+
 @pytest.mark.parametrize("algorithm, file", _gen_file_combinations())
 def test_read_file(algorithm, file):
-    output_path = f'{file}.output'
-    try:
-        os.remove(output_path)
-    except FileNotFoundError:
-        pass
     file = os.path.join(ROOT_PATH, file)
     encoder, decoder = (algorithm.get_encoder(), algorithm.get_decoder())
     input_bytes = io.read_file(file)
     compressor = encoder()
     result = compressor.encode(input_bytes)
+    decompressor = decoder()
+    decoded_bytes = decompressor.decode(result)
+    assert input_bytes == decoded_bytes
+
+
+@pytest.mark.parametrize("algorithm, file", _gen_file_combinations())
+def test_read_encoded_file(algorithm, file):
+    file = os.path.join(ROOT_PATH, file)
+    encoder, decoder = (algorithm.get_encoder(), algorithm.get_decoder())
+    input_bytes = io.read_file(file)
+    compressor = encoder()
+    result = compressor.encode(input_bytes)
+    output_path = f'{file}.{str(uuid.uuid4()).replace("-", "")}.output'
     io.write_file(output_path, result)
     compressed_bytes = io.read_file(output_path)
-    os.remove(output_path)
+    assert result == compressed_bytes
     decompressor = decoder()
     decoded_bytes = decompressor.decode(compressed_bytes)
-    io.write_file(output_path, decoded_bytes)
     assert input_bytes == decoded_bytes
+
+
+@pytest.mark.parametrize("algorithm, file", _gen_file_combinations())
+def test_read_decoded_file(algorithm, file):
+    file = os.path.join(ROOT_PATH, file)
+    encoder, decoder = (algorithm.get_encoder(), algorithm.get_decoder())
+    input_bytes = io.read_file(file)
+    compressor = encoder()
+    result = compressor.encode(input_bytes)
+    output_path = f'{file}.{str(uuid.uuid4()).replace("-", "")}.output'
+    io.write_file(output_path, result)
+    compressed_bytes = io.read_file(output_path)
+    decompressor = decoder()
+    decoded_bytes = decompressor.decode(compressed_bytes)
+    decoded_output_path = f'{file}.{str(uuid.uuid4()).replace("-", "")}.output'
+    io.write_file(decoded_output_path, decoded_bytes)
+    decoded_input_bytes = io.read_file(file)
+    assert input_bytes == decoded_input_bytes
