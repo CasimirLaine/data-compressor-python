@@ -2,59 +2,18 @@
 This module is used as an API for developers to encode and decode data with the Huffman algorithm.
 """
 import bisect
-import json
-import string
-from typing import Type, Optional
+from typing import Type
 
 from bitarray import bitarray
 
 from compress.common import Encoder, Decoder, CompressionAlgorithm, convert
-
-
-class Node:
-    """
-    Represents a node in the Huffman tree.
-    """
-
-    def __init__(
-            self,
-            *,
-            probability: int = 0,
-            symbol: Optional[int] = None,
-            left: 'Node' = None,
-            right: 'Node' = None
-    ) -> None:
-        self.probability = probability
-        self.symbol = symbol
-        self.left = left
-        self.right = right
-        self.code: bitarray = bitarray()
-
-    def __repr__(self) -> str:
-        output_str = '{\n'
-        if self.left:
-            output_str += f'"left": {self.left},\n'
-        if self.right:
-            output_str += f'"right": {self.right},\n'
-        output_str += f'"probability": "{self.probability}",\n'
-        output_str += f'"symbol": "{self.symbol}",\n'
-        output_str += f'"char": "{self.symbol_to_char}",\n'
-        output_str += f'"code": "{self.code}"\n'
-        output_str += '}'
-        return json.dumps(json.loads(output_str), indent=2)
-
-    @property
-    def symbol_to_char(self):
-        try:
-            symbol_chr = chr(self.symbol)
-            if symbol_chr in string.ascii_letters or symbol_chr in string.digits:
-                return symbol_chr
-            return 'not printable'
-        except Exception:
-            return "null"
+from compress.huffman.node import Node
 
 
 def sort_func_node(node: Node):
+    """
+    Used to sort nodes.
+    """
     return -1 * node.probability
 
 
@@ -97,8 +56,8 @@ class _HuffmanEncodingProcess:
     Protected class to maintain the internal state of a single compression run.
     """
 
-    def __init__(self, compressor: HuffmanEncoder, data: bytes):
-        self._compressor = compressor
+    def __init__(self, encoder: HuffmanEncoder, data: bytes):
+        self._encoder = encoder
         self._original_data = data
 
     def calculate_probabilities(self) -> dict[int, int]:

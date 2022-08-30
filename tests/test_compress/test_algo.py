@@ -5,7 +5,7 @@ import uuid
 
 import pytest
 
-from compress import huffman, lz
+from compress import huffman
 from compress.common import io
 from test_compress import ROOT_PATH
 
@@ -19,7 +19,8 @@ __ALGORITHMS = [
 __FILES = [
     'sample/simple.txt',
     'sample/lorem.txt',
-    'sample/image.jpeg',
+    'sample/big_image.jpg',
+    'sample/small_image.jpeg',
     'sample/image.png',
 ]
 

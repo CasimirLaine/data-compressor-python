@@ -17,18 +17,6 @@ class LZEncoder(Encoder):
     Uses the Lempel-Ziv encoding algorithm to compress data.
     """
 
-    def __init__(
-            self,
-            *,
-            search_buffer_size: int = 255,
-            lookahead_buffer_size: int = 128,
-    ):
-        super().__init__()
-        if lookahead_buffer_size > search_buffer_size:
-            raise RuntimeError
-        self.search_buffer_size = search_buffer_size
-        self.lookahead_buffer_size = lookahead_buffer_size
-
     def encode(self, data: bytes) -> bytes:
         """
         Function to call to provide input for the compressor to compress.
@@ -72,6 +60,9 @@ class _LZEncodingProcess:
         self._matches: dict[str, list[int]] = {}
 
     def _find_longest_match(self) -> tuple[int, int]:
+        """
+        Finds the longest match in the search buffer.
+        """
         character = self.original_data[self._cursor]
         match_indices = self.get_match(character)
         if match_indices is None or match_indices[-1] < self.search_limit():
@@ -130,10 +121,16 @@ class _LZEncodingProcess:
 
     @property
     def original_data(self):
+        """
+        The input data to be encoded.
+        """
         return self._original_data
 
     @property
     def data_length(self):
+        """
+        The size of the input data to be encoded.
+        """
         return len(self.original_data)
 
     def search_limit(self):
@@ -157,6 +154,9 @@ class _LZDecodingProcess:
         self._cursor = -1
 
     def decode(self) -> bytes:
+        """
+        Performs the decoding of the input data.
+        """
         data_in_bits = bitarray()
         data_in_bits.frombytes(self._original_data)
         output_buffer = bytearray()

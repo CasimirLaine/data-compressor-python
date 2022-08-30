@@ -32,4 +32,3 @@ def test_write_file_exists():
     with pytest.raises(FileExistsError):
         io.write_file(file_path, data_written)
     os.remove(file_path)
-
