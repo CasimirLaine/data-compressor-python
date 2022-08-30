@@ -19,9 +19,9 @@ __ALGORITHMS = [
 __FILES = [
     'sample/simple.txt',
     'sample/lorem.txt',
-    'sample/big_image.jpg',
-    'sample/small_image.jpeg',
     'sample/image.png',
+    'sample/small_image.jpeg',
+    'sample/big_image.jpg',
 ]
 
 
