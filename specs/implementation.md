@@ -20,10 +20,6 @@
 
 ### Lempel-Ziv
 
-#### Encoding:
-
-#### Decoding:
-
 ### Huffman
 
 | Sample                  | Encoding Speed (s) | Decoding Speed (s) | Original Data (KB) | Compressed Data (KB) | Compression Ratio (%) |
