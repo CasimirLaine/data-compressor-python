@@ -57,67 +57,60 @@ class _LZEncodingProcess:
         self._encoder = compressor
         self._original_data = data
         self._cursor = -1
-        self._matches: dict[str, list[int]] = {}
+        self._matches: dict[bytes, int] = {}
 
-    def _find_longest_match(self) -> tuple[int, int]:
+    def _find_longest_match(
+            self,
+            index: int,
+            data_bytes: bytes,
+            longest_match_length: int = 0,
+            longest_match_offset: int = 0
+    ) -> tuple[int, int]:
         """
         Finds the longest match in the search buffer.
         """
-        character = self.original_data[self._cursor]
-        match_indices = self.get_match(character)
-        if match_indices is None or match_indices[-1] < self.search_limit():
-            self.set_match(character, self._cursor)
-            return 0, 0
-        longest_match_offset = 0
-        longest_match_length = 0
-        for match_index in match_indices:
-            if match_index < self.search_limit():
-                continue
-            left_offset = self._cursor - match_index
-            for lookahead_pointer in range(
-                    min(self._cursor + 1, self.data_length - 1),
-                    self.lookahead_limit() + 1
-            ):
-                next_char_offset = lookahead_pointer - self._cursor
-                if match_index + next_char_offset >= self._cursor:
-                    break
-                if self.original_data[lookahead_pointer] != self.original_data[match_index + next_char_offset]:
-                    break
-                match_length = lookahead_pointer - self._cursor
-                if longest_match_length <= match_length:
-                    longest_match_offset = left_offset
-                    longest_match_length = match_length
-        self.set_match(character, self._cursor)
-        return longest_match_offset, longest_match_length
+        match_index = self.get_match(data_bytes)
+        if match_index is None:
+            self.set_match(data_bytes, index - longest_match_length)
+            return longest_match_length, longest_match_offset
+        longest_match_offset = index - match_index - longest_match_length
+        longest_match_length += 1
+        index += 1
+        if index < self.data_length:
+            return self._find_longest_match(
+                index,
+                data_bytes + self.get_byte(index),
+                longest_match_length=longest_match_length,
+                longest_match_offset=longest_match_offset
+            )
+        return longest_match_length, longest_match_offset
 
     def encode(self) -> bytes:
         """
         Used to start the encoding process internally.
         """
-        encoded_buffer = bytearray()
-        self._cursor = 0
-        while self._cursor < self.data_length:
-            left_offset, match_length = self._find_longest_match()
-            encoded_buffer.extend(convert.char_int_to_bytes(match_length))
-            if match_length == 0:
-                encoded_buffer.extend(
-                    convert.char_int_to_bytes(self.original_data[self._cursor]))
-                self._cursor += 1
-            else:
-                encoded_buffer.extend(convert.char_int_to_bytes(left_offset))
-                self._cursor += match_length
-        return encoded_buffer
+        encoded_buffer = bitarray()
+        index = 0
+        while index < self.data_length:
+            found_byte = self.get_byte(index)
+            match_length, left_offset = self._find_longest_match(index, found_byte)
+            encoded_buffer.frombytes(convert.char_int_to_bytes(match_length))
+            encoded_buffer.frombytes(convert.char_int_to_bytes(left_offset))
+            index += match_length
+            if index < self.data_length:
+                byte_to_write = convert.char_int_to_bytes(self.original_data[index])
+                encoded_buffer.frombytes(byte_to_write)
+            index += 1
+        return bytes(encoded_buffer)
 
     def set_match(self, key, index: int):
-        if self._matches.get(key, None) is None:
-            self._matches[key] = [index]
-            return
-        self._matches[key].append(index)
+        self._matches[key] = index
 
-    def get_match(self, key) -> Optional[list[int]]:
-        if key not in self._matches:
-            return None
-        return self._matches[key].copy()
+    def get_match(self, key) -> Optional[int]:
+        return self._matches.get(key, None)
+
+    def get_byte(self, index: int) -> bytes:
+        return convert.char_int_to_bytes(self.original_data[index])
 
     @property
     def original_data(self):
@@ -137,13 +130,13 @@ class _LZEncodingProcess:
         """
         Returns the smallest index of the search buffer.
         """
-        return max(self._cursor - self._encoder.search_buffer_size, 0)
+        return max(self._cursor - 256, 0)
 
     def lookahead_limit(self):
         """
         Returns the largest index of the lookahead buffer.
         """
-        return min(self._cursor + self._encoder.lookahead_buffer_size, self.data_length - 1)
+        return min(self._cursor + 128, self.data_length - 1)
 
 
 class _LZDecodingProcess:
@@ -163,12 +156,14 @@ class _LZDecodingProcess:
         self._cursor = 0
         while self._cursor < len(data_in_bits):
             match_length = convert.bytes_to_char_int(bytes(data_in_bits[self._cursor: self._cursor + 8]))
-            character_or_offset = bytes(data_in_bits[self._cursor + 8: self._cursor + 16])
-            if match_length == 0:
-                output_buffer.extend(character_or_offset)
-            else:
-                character_or_offset_int = convert.bytes_to_char_int(character_or_offset)
-                output_buffer.extend(bytes(output_buffer[len(output_buffer) - character_or_offset_int: len(
-                    output_buffer) - character_or_offset_int + match_length]))
+            offset = convert.bytes_to_char_int(bytes(data_in_bits[self._cursor + 8: self._cursor + 16]))
+            if match_length > 0:
+                bytes_to_write = bytes(output_buffer[len(output_buffer) - offset: len(
+                    output_buffer) - offset + match_length])
+                output_buffer.extend(bytes_to_write)
             self._cursor += 16
+            if self._cursor + 8 <= len(data_in_bits):
+                byte_data = bytes(data_in_bits[self._cursor: self._cursor + 8])
+                output_buffer.extend(byte_data)
+            self._cursor += 8
         return bytes(output_buffer)
