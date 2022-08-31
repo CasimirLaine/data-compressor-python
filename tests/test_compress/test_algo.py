@@ -5,7 +5,7 @@ import uuid
 
 import pytest
 
-from compress import huffman
+from compress import huffman, lz
 from compress.common import io
 from test_compress import ROOT_PATH
 
@@ -13,7 +13,7 @@ __N = [10_000, 100_000, 1_000_000, 10_000_000]
 
 __ALGORITHMS = [
     huffman.Huffman,
-    # lz.LZ,
+    lz.LZ,
 ]
 
 __FILES = [

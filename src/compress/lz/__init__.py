@@ -2,7 +2,7 @@
 This module is used as an API for developers to encode and decode data with the Lempel-Ziv algorithm.
 """
 from typing import Optional, Type
-
+from collections import deque
 from bitarray import bitarray
 
 from compress.common import CompressionAlgorithm, Decoder, Encoder, convert
@@ -12,7 +12,6 @@ _STRING_ENCODING = 'UTF-8'
 
 class LZEncoder(Encoder):
     """
-    Compressor that can can be modified in constructor arguments.
     Functions as the API for compression process.
     Uses the Lempel-Ziv encoding algorithm to compress data.
     """
@@ -27,6 +26,10 @@ class LZEncoder(Encoder):
 
 
 class LZDecoder(Decoder):
+    """
+    Functions as the API for decompression process.
+    Uses the Lempel-Ziv encoding algorithm to decompress data.
+    """
 
     def decode(self, data: bytes) -> bytes:
         decoding_process = _LZDecodingProcess(self, data)
@@ -56,8 +59,8 @@ class _LZEncodingProcess:
     def __init__(self, compressor: LZEncoder, data: bytes):
         self._encoder = compressor
         self._original_data = data
-        self._cursor = -1
         self._matches: dict[bytes, int] = {}
+        self._match_indices = deque()
 
     def _find_longest_match(
             self,
@@ -101,9 +104,17 @@ class _LZEncodingProcess:
                 byte_to_write = convert.char_int_to_bytes(self.original_data[index])
                 encoded_buffer.frombytes(byte_to_write)
             index += 1
+            while self._match_indices:
+                item = self._match_indices[0]
+                if item[0] < index - 255:
+                    del self._matches[item[1]]
+                    self._match_indices.popleft()
+                else:
+                    break
         return bytes(encoded_buffer)
 
     def set_match(self, key, index: int):
+        self._match_indices.append((index, key))
         self._matches[key] = index
 
     def get_match(self, key) -> Optional[int]:
@@ -125,18 +136,6 @@ class _LZEncodingProcess:
         The size of the input data to be encoded.
         """
         return len(self.original_data)
-
-    def search_limit(self):
-        """
-        Returns the smallest index of the search buffer.
-        """
-        return max(self._cursor - 256, 0)
-
-    def lookahead_limit(self):
-        """
-        Returns the largest index of the lookahead buffer.
-        """
-        return min(self._cursor + 128, self.data_length - 1)
 
 
 class _LZDecodingProcess:
