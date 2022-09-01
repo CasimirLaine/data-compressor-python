@@ -1,13 +1,12 @@
 """
 This module is used as an API for developers to encode and decode data with the Lempel-Ziv algorithm.
 """
-from typing import Optional, Type
 from collections import deque
+from typing import Optional, Type
+
 from bitarray import bitarray
 
 from compress.common import CompressionAlgorithm, Decoder, Encoder, convert
-
-_STRING_ENCODING = 'UTF-8'
 
 
 class LZEncoder(Encoder):
