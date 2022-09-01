@@ -1,7 +1,6 @@
 """
 This module is used as an API for developers to encode and decode data with the Lempel-Ziv algorithm.
 """
-from collections import deque
 from typing import Optional, Type
 
 from bitarray import bitarray
@@ -50,16 +49,22 @@ class LZ(CompressionAlgorithm):
         return LZDecoder
 
 
+OFFSET_BYTES = 1
+LENGTH_BITS = 4
+
+
 class _LZEncodingProcess:
     """
     Protected class to maintain the internal state of a single compression run.
     """
 
+    SEARCH_LIMIT = 2 ** (OFFSET_BYTES * 8) - 1
+    LOOKAHEAD_LIMIT = 2 ** LENGTH_BITS - 1
+
     def __init__(self, compressor: LZEncoder, data: bytes):
         self._encoder = compressor
         self._original_data = data
         self._matches: dict[bytes, int] = {}
-        self._match_indices = deque()
 
     def _find_longest_match(
             self,
@@ -71,10 +76,11 @@ class _LZEncodingProcess:
         """
         Finds the longest match in the search buffer.
         """
-        match_index = self.get_match(data_bytes)
+        match_index = self.get_match(data_bytes, index)
         if match_index is None:
             self.set_match(data_bytes, index - longest_match_length)
             return longest_match_length, longest_match_offset
+        self.set_match(data_bytes, index - longest_match_length)
         longest_match_offset = index - match_index - longest_match_length
         longest_match_length += 1
         index += 1
@@ -96,28 +102,39 @@ class _LZEncodingProcess:
         while index < self.data_length:
             found_byte = self.get_byte(index)
             match_length, left_offset = self._find_longest_match(index, found_byte)
-            encoded_buffer.frombytes(convert.char_int_to_bytes(match_length))
-            encoded_buffer.frombytes(convert.char_int_to_bytes(left_offset))
-            index += match_length
-            if index < self.data_length:
-                byte_to_write = convert.char_int_to_bytes(self.original_data[index])
-                encoded_buffer.frombytes(byte_to_write)
+            if LENGTH_BITS + OFFSET_BYTES * 8 + 8 < match_length * 8:
+                index += match_length
+                encoded_buffer.append(1)
+                match_length &= 2 ** LENGTH_BITS - 1
+                encoded_buffer.frombytes(convert.char_int_to_bytes(match_length << LENGTH_BITS))
+                del encoded_buffer[-LENGTH_BITS:]
+                encoded_buffer.frombytes(convert.char_int_to_bytes(left_offset))
+                if index < self.data_length:
+                    byte_to_write = self.original_data[index: index]
+                    encoded_buffer.frombytes(byte_to_write)
+            else:
+                encoded_buffer.append(0)
+                encoded_buffer.frombytes(found_byte)
             index += 1
-            while self._match_indices:
-                item = self._match_indices[0]
-                if item[0] < index - 255:
-                    del self._matches[item[1]]
-                    self._match_indices.popleft()
-                else:
-                    break
+        encoded_buffer.fill()
         return bytes(encoded_buffer)
 
     def set_match(self, key, index: int):
-        self._match_indices.append((index, key))
         self._matches[key] = index
 
-    def get_match(self, key) -> Optional[int]:
-        return self._matches.get(key, None)
+    def get_match(self, key, index: int) -> Optional[int]:
+        # found_index = self._matches.get(key, None)
+        # if found_index is not None and (found_index < index - self.SEARCH_LIMIT or found_index >= index):
+        #     del self._matches[key]
+        #     return None
+        # return found_index
+
+        found_index = self.original_data[:index].rfind(key)
+        if found_index == -1:
+            return None
+        if found_index < index - self.SEARCH_LIMIT:
+            return None
+        return found_index
 
     def get_byte(self, index: int) -> bytes:
         return convert.char_int_to_bytes(self.original_data[index])
@@ -142,7 +159,6 @@ class _LZDecodingProcess:
     def __init__(self, decoder: LZDecoder, data: bytes):
         self._decoder = decoder
         self._original_data = data
-        self._cursor = -1
 
     def decode(self) -> bytes:
         """
@@ -151,17 +167,22 @@ class _LZDecodingProcess:
         data_in_bits = bitarray()
         data_in_bits.frombytes(self._original_data)
         output_buffer = bytearray()
-        self._cursor = 0
-        while self._cursor < len(data_in_bits):
-            match_length = convert.bytes_to_char_int(bytes(data_in_bits[self._cursor: self._cursor + 8]))
-            offset = convert.bytes_to_char_int(bytes(data_in_bits[self._cursor + 8: self._cursor + 16]))
-            if match_length > 0:
-                bytes_to_write = bytes(output_buffer[len(output_buffer) - offset: len(
-                    output_buffer) - offset + match_length])
-                output_buffer.extend(bytes_to_write)
-            self._cursor += 16
-            if self._cursor + 8 <= len(data_in_bits):
-                byte_data = bytes(data_in_bits[self._cursor: self._cursor + 8])
-                output_buffer.extend(byte_data)
-            self._cursor += 8
+        index = 0
+        while index < len(data_in_bits):
+            bit_flag = data_in_bits[index]
+            index += 1
+            if bit_flag == 1:
+                match_length = convert.bytes_to_char_int(data_in_bits[index: index + LENGTH_BITS].tobytes())
+                index += LENGTH_BITS
+                offset = convert.bytes_to_char_int(data_in_bits[index: index + 8].tobytes())
+                index += 8
+                if match_length > 0:
+                    bytes_to_write = bytes(
+                        output_buffer[len(output_buffer) - offset: len(output_buffer) - offset + match_length]
+                    )
+                    output_buffer.extend(bytes_to_write)
+            if index + 8 <= len(data_in_bits):
+                final_byte = data_in_bits[index: index + 8].tobytes()
+                output_buffer.extend(final_byte)
+            index += 8
         return bytes(output_buffer)

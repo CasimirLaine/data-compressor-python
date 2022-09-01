@@ -12,8 +12,8 @@ from test_compress import ROOT_PATH
 __N = [10_000, 100_000, 1_000_000, 10_000_000]
 
 __ALGORITHMS = [
-    huffman.Huffman,
     lz.LZ,
+    huffman.Huffman,
 ]
 
 __FILES = [
