@@ -5,6 +5,7 @@ import getopt
 import sys
 
 from compress.common import io, CompressionAlgorithm
+from compress.huffman import Huffman
 from compress.lz import LZ
 
 
@@ -60,7 +61,7 @@ _OPTIONS: dict[str, _CommandLineArgument] = {
 
 _ALGORITHMS: dict[str, CompressionAlgorithm] = {
     Algorithm.LZ77: LZ,
-    Algorithm.HUFFMAN: CompressionAlgorithm
+    Algorithm.HUFFMAN: Huffman
 }
 
 
