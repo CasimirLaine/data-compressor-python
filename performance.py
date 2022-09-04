@@ -26,8 +26,8 @@ __N = [
 __ALGORITHMS = [
     lz.LZ,
     huffman.Huffman,
-    lzh.LZH,
-    hlz.HLZ,
+    # lzh.LZH,
+    # hlz.HLZ,
 ]
 
 __FILES = [

@@ -3,6 +3,7 @@
 The program has been tested with **Python** version 3.10.
 
 Program has been tested using various methods.
+
 - Unit tests with pytest-module.
 - Integration tests have been performed on different operating systems (Windows, Linux and macOS)
 - Performance tests using timing.
@@ -12,7 +13,8 @@ Program has been tested using various methods.
 
 ### Application Logic
 
-The application logic has been tested via pytest test framework. Tests can be found in [tests](https://github.com/CasimirLaine/data-compressor-python/tree/master/tests) folder.
+The application logic has been tested via pytest test framework. Tests can be found
+in [tests](https://github.com/CasimirLaine/data-compressor-python/tree/master/tests) folder.
 
 ### Test Coverage
 
@@ -45,3 +47,6 @@ The application does not make network requests.
 The application has been tested according to the manual provided in the [user manual](manual.md).
 
 ## Empirical Performance Tests
+
+The empirical test results of the compression algorithms can be found in
+the [implementation document](implementation.md)

@@ -2,8 +2,8 @@
 
 ## Installation
 
-- Download and install [Python version 3.10](https://www.python.org/downloads/) or older.
-- Close this repository on your computer
+- Download and install [Python version 3.10](https://www.python.org/downloads/) or newer.
+- Clone this repository on your computer
 
 ## Running
 
