@@ -79,6 +79,8 @@ Time complexity: O(n).
 
 ## Performance Results
 
+Further empirical proof of the time complexities can be read from the visualization below.
+
 ### Lempel-Ziv
 
 | Sample                  | Encoding Speed (s) | Decoding Speed (s) | Original Data (KB) | Compressed Data (KB) | Compression Ratio |
