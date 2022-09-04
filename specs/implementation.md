@@ -52,6 +52,7 @@
 
 ## Notes
 
-.
+The LZ implementation does not seem to play well with totally random bytes.
+The speed of LZ compression could be improved.
 
 ## [Sources](sources.md)

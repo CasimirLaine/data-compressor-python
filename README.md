@@ -36,7 +36,7 @@ To run the program:
 python main.py -h --help -a <algorithm> --algorithm=<algorithm> -o <output_file> --output_file=<output_file> -f <file> --file=<file> -m <method> --method=<method> <input>
 ```
 
-Refer to the [user manual](./specs/testing.md) for more info.
+Refer to the [user manual](./specs/manual.md) for more info.
 
 ### Performance Benchmarks
 
