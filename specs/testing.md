@@ -49,4 +49,4 @@ The application has been tested according to the manual provided in the [user ma
 ## Empirical Performance Tests
 
 The empirical test results of the compression algorithms can be found in
-the [implementation document](implementation.md)
+the [implementation document](implementation.md).

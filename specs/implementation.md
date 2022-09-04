@@ -2,6 +2,34 @@
 
 ## Structure
 
+### Lempel-Ziv
+
+The data is encoded into sequences of three bytes.
+The first 4 bits are the offset left of the current position.
+The next 12 bits represent the length of the match.
+The remaining byte is the next byte in the original data.
+
+However, an optimization is made when the match length is under 3 bytes.
+In that case only the byte is inserted.
+
+To decode this variable-width data 0 bit is inserted before the three bytes when match is found.
+If only the byte is written a 1 bit is inserted before the byte.
+
+### Huffman
+
+In the beginning of the data there is a header of three 32-bit integers.
+These are:
+- Size of the Huffman tree in bytes.
+- Amount of unique bytes in the original data.
+- Size of the original data in bytes.
+
+The Huffman tree is stored after the header.
+This tree is encoded with post-order traversal, starting from the left.
+When a leaf node is encountered 1 bit is appended after which the byte that the leaf node represents is inserted.
+Other nodes in the tree will output 0 bit in the encoding.
+
+After the Huffman tree the data encoded according to the tree is written.
+
 ## Complexity
 
 ### Lempel-Ziv
