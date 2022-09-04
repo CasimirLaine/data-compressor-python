@@ -19,6 +19,7 @@ If only the byte is written a 1 bit is inserted before the byte.
 
 In the beginning of the data there is a header of three 32-bit integers.
 These are:
+
 - Size of the Huffman tree in bytes.
 - Amount of unique bytes in the original data.
 - Size of the original data in bytes.
@@ -57,7 +58,24 @@ Time complexity: O(n).
 
 #### Encoding:
 
+The algorithm starts by iterating the input to calculate the frequencies of characters.
+This is done in O(n) time.
+After that the Huffman tree is built.
+This also happens in linear time as it is normal tree traversal.
+When the tree is ready, it is encoded into a buffer.
+This also traverses the tree in linear time.
+At last the input bytes are processed one by one in a for loop to build the output.
+
+Time complexity: O(n).
+
 #### Decoding:
+
+The decoding reverses the encoding operation thus starting with decoding the Huffman tree from the beginning of the input.
+The tree is built in linear time in a single while loop.
+After the tree is build the rest of the input is processed in a while loop and the arrays of bits are searched from the Huffman tree.
+Tree access operation is done in O(log n) time, but since the tree will not contain more than 256 leaf nodes the tree will not grow at the same rate as the input data size.
+
+Time complexity: O(n).
 
 ## Performance Results
 
