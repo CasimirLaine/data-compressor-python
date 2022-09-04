@@ -36,7 +36,22 @@ After the Huffman tree the data encoded according to the tree is written.
 
 #### Encoding:
 
+The encoding algorithm approaches linear time since the input is processed in a single loop.
+Inside that loop, however, some matches are found recursively.
+This recursion still has a stack limit of 15 since the length of the match cannot be longer.
+This is due to the limit of four bits that are allocated for the match length in the output.
+Further, the matches of the already-processed part of the input are store in a dict.
+Dict has a O(1) constant time complexity in access operations.
+So accessing past matches will not affect time complexity.
+
+Time complexity: O(n).
+
 #### Decoding:
+
+Much like the encoding, the decoder processed the input in a single while-loop.
+Looping over the data and appending matches to an output buffer.
+
+Time complexity: O(n).
 
 ### Huffman
 
