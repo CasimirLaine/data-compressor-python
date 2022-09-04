@@ -12,21 +12,30 @@ path_prefix = f'{root_path}{os.sep}'
 sys.path.append(f'{path_prefix}src')
 
 from compress.common import io, Encoder, Decoder, CompressionAlgorithm
-from compress import huffman, lz
+from compress import huffman, lz, lzh, hlz
 
-__N = [1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000]
+__N = [
+    1_000,
+    10_000,
+    100_000,
+    1_000_000,
+    10_000_000,
+    100_000_000,
+]
 
 __ALGORITHMS = [
-    # huffman.Huffman,
     lz.LZ,
+    huffman.Huffman,
+    lzh.LZH,
+    hlz.HLZ,
 ]
 
 __FILES = [
     'sample/simple.txt',
     'sample/lorem.txt',
-    'sample/image.png',
+    'sample/shakespeare.txt',
+    'sample/simple_image.png',
     'sample/small_image.jpeg',
-    'sample/big_image.jpg',
 ]
 
 

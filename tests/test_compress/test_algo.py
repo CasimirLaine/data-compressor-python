@@ -5,23 +5,30 @@ import uuid
 
 import pytest
 
-from compress import huffman, lz
+from compress import huffman, lz, lzh, hlz
 from compress.common import io
 from test_compress import ROOT_PATH
 
-__N = [10_000, 100_000, 1_000_000, 10_000_000]
+__N = [
+    10_000,
+    100_000,
+    1_000_000,
+    10_000_000
+]
 
 __ALGORITHMS = [
     lz.LZ,
     huffman.Huffman,
+    lzh.LZH,
+    hlz.HLZ,
 ]
 
 __FILES = [
     'sample/simple.txt',
     'sample/lorem.txt',
-    'sample/image.png',
+    'sample/shakespeare.txt',
+    'sample/simple_image.png',
     'sample/small_image.jpeg',
-    'sample/big_image.jpg',
 ]
 
 
@@ -43,24 +50,6 @@ def _gen_file_combinations():
 
 def _random_bytes(n):
     return ''.join(random.choice(string.printable) for _ in range(n)).encode()
-
-
-@pytest.mark.parametrize("algorithm, n", _gen_combinations())
-def test_encode_smaller(algorithm, n):
-    encoder = algorithm.get_encoder()
-    input_bytes = _random_bytes(n)
-    compressor = encoder()
-    result = compressor.encode(input_bytes)
-    assert len(result) <= len(input_bytes)
-
-
-@pytest.mark.parametrize("algorithm, n", _gen_combinations())
-def test_encode_smaller_enough(algorithm, n):
-    encoder = algorithm.get_encoder()
-    input_bytes = _random_bytes(n)
-    compressor = encoder()
-    result = compressor.encode(input_bytes)
-    assert len(result) <= len(input_bytes) * 0.9
 
 
 @pytest.mark.parametrize("algorithm, n", _gen_combinations())

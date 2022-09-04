@@ -22,7 +22,7 @@ Prints the help string.
 -a --algorithm
 
 Selects the algorithm used.
-Options: lz77, huffman
+Options: lz77, huffman, lzh, hlz
 
 -o --output_file
 

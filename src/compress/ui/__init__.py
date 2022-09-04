@@ -5,8 +5,10 @@ import getopt
 import sys
 
 from compress.common import io, CompressionAlgorithm
+from compress.hlz import HLZ
 from compress.huffman import Huffman
 from compress.lz import LZ
+from compress.lzh import LZH
 
 
 class Commands:
@@ -26,6 +28,8 @@ class Algorithm:
     """
     LZ77 = 'lz77'
     HUFFMAN = 'huffman'
+    LZH = 'lzh'
+    HLZ = 'hlz'
 
 
 class Method:
@@ -34,6 +38,14 @@ class Method:
     """
     ENCODE = 'encode'
     DECODE = 'decode'
+
+
+_ALGORITHMS: dict[str, CompressionAlgorithm] = {
+    Algorithm.LZ77: LZ,
+    Algorithm.HUFFMAN: Huffman,
+    Algorithm.LZH: LZH,
+    Algorithm.HLZ: HLZ,
+}
 
 
 class _CommandLineArgument:
@@ -57,11 +69,6 @@ _OPTIONS: dict[str, _CommandLineArgument] = {
     Commands.OUTPUT_FILE: _CommandLineArgument(short='o:', long='output_file=', hint='output_file'),
     Commands.FILE: _CommandLineArgument(short='f:', long='file=', hint='file'),
     Commands.METHOD: _CommandLineArgument(short='m:', long='method=', hint='method'),
-}
-
-_ALGORITHMS: dict[str, CompressionAlgorithm] = {
-    Algorithm.LZ77: LZ,
-    Algorithm.HUFFMAN: Huffman
 }
 
 

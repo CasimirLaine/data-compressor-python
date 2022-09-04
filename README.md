@@ -34,7 +34,16 @@ To run the program:
 
 ```bash 
 python main.py -h --help -a <algorithm> --algorithm=<algorithm> -o <output_file> --output_file=<output_file> -f <file> --file=<file> -m <method> --method=<method> <input>
+```
 
+Refer to the [user manual](./specs/testing.md) for more info.
+
+### Performance Benchmarks
+
+To run performance benchmarks:
+
+```bash 
+python performance.py
 ```
 
 ### Static Analysis
@@ -51,6 +60,12 @@ To run unit tests:
 
 ```bash
 pytest
+```
+
+To run unit tests in parallel:
+
+```bash
+pytest -n auto
 ```
 
 ### Generate Test Coverage

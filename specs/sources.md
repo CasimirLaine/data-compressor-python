@@ -11,3 +11,5 @@ https://towardsdatascience.com/how-data-compression-works-exploring-lz77-3a2c2e0
 https://www.slideshare.net/jkciitj/optimization-of-lz77-data-compression-algorithm
 
 https://engineering.purdue.edu/ece264/17au/hw/HW13?alt=huffman
+
+https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.947.1827&rep=rep1&type=pdf
